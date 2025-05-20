@@ -23,7 +23,7 @@ const SpecialityMenu = () => {
         {specialityData.map((item, index) => (
           <Link  
              onClick={() =>scrollTo(0,0)}
-            to={`/doctors/${item.speciality.toLowerCase().replace(/ /g, "-")}`}
+            to={`/doctors/${item.speciality}`}
             key={index}
             className="flex flex-col items-center text-center bg-white rounded-xl p-4 shadow hover:shadow-lg transition-all duration-300 hover:scale-105"
           >

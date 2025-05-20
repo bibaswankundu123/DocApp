@@ -1,83 +1,42 @@
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaLinkedinIn,
-  FaInstagram,
-  FaYoutube,
-} from "react-icons/fa";
 import React from "react";
+import { assets } from "../assets/assets";
 
 const Footer = () => {
   return (
-    <footer className="bg-white text-black py-12 px-6 md:px-16">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Logo & About */}
+    <footer className="px-6 md:px-10 bg-white text-gray-700">
+      <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr] py-20 border-b">
+        {/* Logo & Description */}
         <div>
-          <p className="text-sm text-gray-600 text-justify">
-            
+          <img src={assets.logo} alt="Company Logo" className="w-40 mb-6" />
+          <p className="max-w-md text-sm leading-relaxed text-gray-600">
+            We are committed to connecting patients with top-tier healthcare professionals through an intuitive and secure platform.
           </p>
         </div>
 
-        {/* Services */}
+        {/* Company Links */}
         <div>
-         
-          <ul className="space-y-2 text-gray-600">
-            <li>
-              <a href="/">Home</a>
-            </li>
-            <li>
-              <a href="/about">About Us</a>
-            </li>
-            <li>
-              <a href="/gallery">Doctors</a>
-            </li>
-            <li>
-              <a href="/gallery">Contact Us</a>
-            </li>
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Company</h3>
+          <ul className="space-y-2 text-sm">
+            <li className="hover:text-black cursor-pointer">Home</li>
+            <li className="hover:text-black cursor-pointer">About Us</li>
+            <li className="hover:text-black cursor-pointer">Contact Us</li>
+            <li className="hover:text-black cursor-pointer">Privacy Policy</li>
           </ul>
         </div>
 
-        {/* Support */}
+        {/* Contact Info */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Support</h3>
-          <ul className="space-y-2 text-gray-300">
-           
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Get in Touch</h3>
+          <ul className="space-y-2 text-sm">
+            <li>📞 +1-212-456-7890</li>
+            <li>✉️ clientmail@gmail.com</li>
           </ul>
-          <div className="flex space-x-4 mt-4">
-            <a href="#" className="text-gray-600 hover:text-gray-400">
-              <FaFacebookF size={20} />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-gray-400">
-              <FaTwitter size={20} />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-gray-400">
-              <FaLinkedinIn size={20} />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-gray-400">
-              <FaInstagram size={20} />
-            </a>
-            <a href="#" className="text-gray-600 hover:text-gray-400">
-              <FaYoutube size={20} />
-            </a>
-          </div>
         </div>
-
-        {/* Map & Address */}
-        
       </div>
 
-      {/* Copyright */}
-      <div className="mt-8 text-center border-t border-gray-600 pt-4 text-gray-600 text-sm">
-        Copyright &copy; 2025. All Rights Reserved by{" "}
-        <a
-          href="https://aimdigitalise.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-400 hover:text-blue-600 underline"
-        >
-          AIM Digitalise
-        </a>
-        .
+      {/* Footer Bottom */}
+      <div className="text-center py-6 text-sm text-gray-500">
+        &copy; 2025 AIM Digitalise. All rights reserved.
       </div>
     </footer>
   );
