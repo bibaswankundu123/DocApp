@@ -10,12 +10,15 @@ const Navbar = () => {
 
   return (
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
-      <img
-        onClick={() => navigate("/")}
-        className="w-44 cursor-pointer"
-        src={assets.logo}
-        alt="Logo"
-      />
+      <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+        <img 
+          className="w-12 h-12" 
+          src="/company-logo.png" 
+          alt="Medicaid Logo" 
+        />
+        <span className="text-2xl font-bold text-primary">Medicaid</span>
+      </div>
+      
       <ul className="hidden md:flex items-start gap-5 font-medium">
         <NavLink to="/">
           <li className="py-1">HOME</li>
@@ -87,7 +90,10 @@ const Navbar = () => {
           } md:hidden`}
         >
           <div className="flex items-center justify-between px-5 py-6">
-            <img className="w-36" src={assets.logo} alt="" />
+            <div className="flex items-center gap-2">
+              <img className="w-10 h-10" src="/company-logo.png" alt="Medicaid Logo" />
+              <span className="text-xl font-bold text-primary">Medicaid</span>
+            </div>
             <img
               className="w-7"
               onClick={() => setShowMenu(false)}
