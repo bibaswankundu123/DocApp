@@ -1,144 +1,107 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import Admin from "../models/Admin.js";
 
-// ✅ Admin Login with Refresh Token
-export const adminLogin = async (req, res) => {
+import validator from 'validator';
+import bcrypt from 'bcryptjs';
+import {v2 as cloudinary} from 'cloudinary';
+import doctorModel from '../models/doctorModel.js';
+import jwt from 'jsonwebtoken';
+
+
+//API FOR ADDING DOCTOR
+
+const addDoctor = async (req,res) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+    const { name, email, password, speciality,degree,experience,about,fees,address } = req.body;
+    const imageFile = req.file;
+    // checing for all data to add doctor
+    if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address || !imageFile) {
+      return res.json({success:false,message:"Missing details"})
     }
 
-    const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    if(!validator.isEmail(email)){
+      return res.json({success:false,message:"Invalid email"})
+
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    // validating strong password
+    if(password.length < 8 ) {
+       return res.json({success:false,message:"Give a strong password "})
     }
+   
+    // hashing doctor password
 
-    // ✅ Generate Access Token (Short-lived)
-    const accessToken = jwt.sign({ id: admin._id,role: "ADMIN" }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ✅ Generate Refresh Token (Long-lived)
-    const refreshToken = jwt.sign({ id: admin._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    // upload image to cloudinary
+    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: 'image'});
+    const imageUrl = imageUpload.secure_url;
+   
 
-    // ✅ Store Refresh Token in Admin DB
-    admin.refreshToken = refreshToken;
-    await admin.save();
-
-    res.status(200).json({ 
-      message: "Login successful", 
-      accessToken, 
-      refreshToken 
+    const doctorData = { 
+      name,
+      email,
+       image: imageUrl,
+      password: hashedPassword, 
+      speciality,
+      degree,
+      experience,
+      about,
+      fees,
+      address:JSON.parse(address),
+      date:Date.now()
+     
+      
+    }
+   
+    const  newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+    res.json({
+      success: true,
+      message: 'Doctor added successfully'
+     
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error });
-  }
-};
-
-
-export const refreshToken = async (req, res) => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(403).json({ message: "Refresh token required" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-
-    const admin = await Admin.findById(decoded.id);
-    if (!admin || admin.refreshToken !== token) {
-      return res.status(403).json({ message: "Invalid refresh token" });
-    }
-
-    // ✅ Generate a new Access Token
-    const newAccessToken = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-
-    res.status(200).json({ accessToken: newAccessToken });
-  } catch (error) {
-    res.status(500).json({ message: "Token refresh failed", error });
-  }
-};
-
-
-export const adminLogout = async (req, res) => {
-  try {
-    const { token } = req.body; // Get refresh token from request
-
-    if (!token) {
-      return res.status(400).json({ message: "Token is required" });
-    }
-
-    const admin = await Admin.findOne({ refreshToken: token });
-    if (!admin) {
-      return res.status(400).json({ message: "Invalid token" });
-    }
-
-    // ✅ Remove refresh token from the database
-    admin.refreshToken = "";
-await admin.save();
-
-    res.status(200).json({ message: "Logout successful" });
-  } catch (error) {
-    res.status(500).json({ message: "Logout failed", error });
-  }
-};
-
-
-
-
-
-export const changeAdminPassword = async (req, res) => {
-  try {
-    const { email, oldPassword, newPassword } = req.body;
-
-    if (!email || !oldPassword || !newPassword) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
-
-    // 🔑 Check if old password is correct
-    const isMatch = await bcrypt.compare(oldPassword, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Old password is incorrect" });
-    }
-
-    // 🔐 Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    admin.password = hashedPassword;
-
-    // ❌ Invalidate old refresh token
-    admin.refreshToken = null;
-    await admin.save();
-
-    // 🔄 Generate new tokens
-    const newAccessToken = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-    const newRefreshToken = jwt.sign({ id: admin._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
-
-    // ✅ Store new refresh token in DB
-    admin.refreshToken = newRefreshToken;
-    await admin.save();
-
-    res.status(200).json({ 
-      message: "Password updated successfully. Please log in again.", 
-      accessToken: newAccessToken, 
-      refreshToken: newRefreshToken 
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
     });
-
-  } catch (error) {
-    res.status(500).json({ message: "Password update failed", error });
   }
-};
+}
 
 
+//Api for admin login
+
+const loginAdmin = async (req,res) => {
+     try {
+       
+      const { email, password } = req.body;
+       
+      if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+
+        const token = jwt.sign(email+password,process.env.JWT_SECRET)
+         res.json({
+          success:true,
+          token
+         })
+       
+        
+      } else {
+        res.json({
+          success:false,
+          message: 'Invalid credentials',
+        })
+      }
+      
+     } catch (error) {
+       console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+      
+     }
+}
+
+export { addDoctor ,loginAdmin};

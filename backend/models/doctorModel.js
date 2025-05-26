@@ -38,7 +38,7 @@ const doctorSchema = new mongoose.Schema({
   },
   available: {
     type: Boolean,
-    required: true
+    default: true
   },
   fees: {
     type: Number,
@@ -48,10 +48,17 @@ const doctorSchema = new mongoose.Schema({
     type: Object,
     required: true
   },
-  Date: {
+  date: {
     type: Number,
     required: true
   },
-}, { timestamps: true });
+  slots_booked: {
+    type: Object,
+    default: {}
+  },
+}, { minimize: false });
 
-export default mongoose.model('Address', doctorSchema, 'addresses'); 
+const doctorModel = mongoose.models.doctor || mongoose.model('doctor', doctorSchema);
+
+
+export default doctorModel;

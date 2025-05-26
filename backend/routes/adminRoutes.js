@@ -1,12 +1,13 @@
 import express from "express";
-import { adminLogin, adminLogout, refreshToken, changeAdminPassword  } from "../controllers/adminController.js";
+import { addDoctor,loginAdmin } from "../controllers/adminController.js";
+import upload from "../middleware/multer.js";
+import authAdmin from "../middleware/authAdmin.js";
 
-const router = express.Router();
+const adminRouter = express.Router();
 
-router.post("/login", adminLogin);
-router.post("/logout", adminLogout);
-router.post("/refresh-token", refreshToken);
-router.post("/change-password", changeAdminPassword); 
+adminRouter.post("/add-doctor",authAdmin,upload.single('image') ,addDoctor);
+adminRouter.post("/login",loginAdmin);
+ 
 
-export default router;
+export default adminRouter;
 

@@ -41,7 +41,7 @@ const Blog = () => {
       id: 3,
       title: "Pediatric Care in the Digital Age",
       excerpt: "What parents should know about online pediatric consultations.",
-      image: "public/blog.jpg",
+      image: "blog.jpg",
       date: "April 10, 2023"
     },
     {
