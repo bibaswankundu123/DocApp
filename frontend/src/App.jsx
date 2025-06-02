@@ -11,11 +11,23 @@ import Appointment from './pages/Appointment';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Blogs from "./pages/Blog";
+import { ToastContainer, toast } from 'react-toastify';
 
 
 const App = () => {
   return (
     <div className="mx-4 sm:mx-[10%]">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"/>
       <Navbar/>
     <Routes>
        <Route  path="/" element={<Home/>}/>
