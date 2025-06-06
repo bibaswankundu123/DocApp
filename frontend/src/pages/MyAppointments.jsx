@@ -6,14 +6,6 @@ import { toast } from 'react-toastify';
 const MyAppointments = () => {
     const { backendUrl, token, getDoctorsData } = useContext(AppContext);
     const [appointments, setAppointments] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        phone: '',
-        address: '',
-        reason: ''
-    });
 
     const months = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -50,32 +42,6 @@ const MyAppointments = () => {
         }
     };
 
-    const confirmBooking = async () => {
-        try {
-            const { data } = await axios.post(
-                backendUrl + '/api/user/confirm-booking',
-                { appointmentId: selectedAppointmentId, customerDetails: formData },
-                { headers: { token } }
-            );
-            if (data.success) {
-                toast.success(data.message);
-                setShowModal(false);
-                setFormData({ name: '', phone: '', address: '', reason: '' });
-                getUserAppointments();
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error(error.message);
-        }
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
     useEffect(() => {
         if (token) {
             getUserAppointments();
@@ -103,17 +69,6 @@ const MyAppointments = () => {
                         </div>
                         <div>
                             <div className='flex flex-col gap-2 justify-end'>
-                                {!item.cancelled && !item.customerDetails?.name && !item.isCompleted && (
-                                    <button
-                                        className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border hover:bg-primary hover:text-white transition-all duration-300 rounded'
-                                        onClick={() => {
-                                            setSelectedAppointmentId(item._id);
-                                            setShowModal(true);
-                                        }}
-                                    >
-                                        Confirm Booking
-                                    </button>
-                                )}
                                 {!item.cancelled && item.customerDetails?.name && !item.isCompleted && (
                                     <p className='text-sm text-green-500'>Booking Confirmed</p>
                                 )}
@@ -140,82 +95,8 @@ const MyAppointments = () => {
                     </div>
                 ))}
             </div>
-
-            {/* Modal for Customer Form */}
-            {showModal && (
-                <div className='fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center'>
-                    <div className='bg-white p-6 rounded-lg w-full max-w-md'>
-                        <h2 className='text-lg font-medium mb-4'>Enter Your Details</h2>
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                confirmBooking();
-                            }}
-                        >
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700'>Name</label>
-                                <input
-                                    type='text'
-                                    name='name'
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    className='mt-1 p-2 w-full border rounded'
-                                    required
-                                />
-                            </div>
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700'>Phone</label>
-                                <input
-                                    type='tel'
-                                    name='phone'
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    className='mt-1 p-2 w-full border rounded'
-                                    required
-                                />
-                            </div>
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700'>Address</label>
-                                <input
-                                    type='text'
-                                    name='address'
-                                    value={formData.address}
-                                    onChange={handleInputChange}
-                                    className='mt-1 p-2 w-full border rounded'
-                                    required
-                                />
-                            </div>
-                            <div className='mb-4'>
-                                <label className='block text-sm font-medium text-gray-700'>Reason for Visit</label>
-                                <textarea
-                                    name='reason'
-                                    value={formData.reason}
-                                    onChange={handleInputChange}
-                                    className='mt-1 p-2 w-full border rounded'
-                                    required
-                                />
-                            </div>
-                            <div className='flex justify-end gap-2'>
-                                <button
-                                    type='button'
-                                    onClick={() => setShowModal(false)}
-                                    className='px-4 py-2 border rounded hover:bg-gray-100'
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type='submit'
-                                    className='px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark'
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
 
-export default MyAppointments;
+export default MyAppointments; 
