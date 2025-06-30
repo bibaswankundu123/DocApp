@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "./../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import contactModel from "../models/contactModel.js";
 
 // API to register a new user
 const registerUser = async (req, res) => {
@@ -314,6 +315,48 @@ const confirmBooking = async (req, res) => {
   }
 };
 
+// API to submit contact form
+const submitContactForm = async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.json({
+        success: false,
+        message: "Invalid email address",
+      });
+    }
+
+    const contactData = {
+      name,
+      email,
+      subject,
+      message,
+    };
+
+    const newContact = new contactModel(contactData);
+    await newContact.save();
+
+    res.json({
+      success: true,
+      message: "Message sent successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -323,4 +366,5 @@ export {
   listAppointment,
   cancelAppointment,
   confirmBooking,
+  submitContactForm
 };

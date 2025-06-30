@@ -1,5 +1,5 @@
 import express from "express";
-import { addDoctor, loginAdmin, allDoctors, appointmentsAdmin, appointmentCancel, markAppointmentCompleted, adminDashboard } from "../controllers/adminController.js";
+import { addDoctor, loginAdmin, allDoctors, appointmentsAdmin, appointmentCancel, markAppointmentCompleted, adminDashboard , getAllContactMessages,} from "../controllers/adminController.js";
 import upload from "../middleware/multer.js";
 import authAdmin from "../middleware/authAdmin.js";
 import { changeAvailability } from "../controllers/doctorController.js";
@@ -14,5 +14,6 @@ adminRouter.get("/appointments", authAdmin, appointmentsAdmin);
 adminRouter.post("/cancel-appointment", authAdmin, appointmentCancel);
 adminRouter.post("/mark-completed", authAdmin, markAppointmentCompleted);
 adminRouter.get("/dashboard", authAdmin, adminDashboard);
+adminRouter.get("/contact-messages", authAdmin, getAllContactMessages); 
 
 export default adminRouter;

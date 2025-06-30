@@ -5,6 +5,7 @@ import doctorModel from "../models/doctorModel.js";
 import jwt from "jsonwebtoken";
 import appointmentModel from "./../models/appointmentModel.js";
 import userModel from "./../models/userModel.js";
+import contactModel from "../models/contactModel.js";
 
 // API FOR ADDING DOCTOR
 const addDoctor = async (req, res) => {
@@ -217,6 +218,21 @@ const adminDashboard = async (req, res) => {
   }
 };
 
+// API to get all contact messages
+const getAllContactMessages = async (req, res) => {
+  try {
+    const messages = await contactModel.find({}).sort({ createdAt: -1 });
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 export {
   addDoctor,
   loginAdmin,
@@ -225,4 +241,5 @@ export {
   appointmentCancel,
   markAppointmentCompleted,
   adminDashboard,
+  getAllContactMessages
 };

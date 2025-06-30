@@ -13,6 +13,7 @@ import DoctorDashboard from "./pages/Doctor/DoctorDashboard"
 import { DoctorContext } from './context/DoctorContext';
 import DoctorAppointments from './pages/Doctor/DoctorAppointments';
 import DoctorProfile from './pages/Doctor/DoctorProfile';
+import ContactMessages from './pages/Admin/ContactMessages';
   
 
 const App = () => {
@@ -59,6 +60,7 @@ const App = () => {
           <Route path='/doctor-dashboard' element={<DoctorDashboard/>} />
           <Route path='/doctor-appointments' element={<DoctorAppointments/>} />
           <Route path='/doctor-profile' element={<DoctorProfile/>} />
+          <Route path='/contact-messages' element={<ContactMessages/>} />
         </Routes>
         
       </div>
