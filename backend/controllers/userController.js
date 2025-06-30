@@ -18,6 +18,13 @@ const registerUser = async (req, res) => {
       });
     }
 
+       if (!/^\d{10}$/.test(phone)) {
+      return res.json({
+        success: false,
+        message: "Phone number must be exactly 10 digits",
+      });
+    }
+
     if (email && !validator.isEmail(email)) {
       return res.json({
         success: false,
@@ -168,15 +175,39 @@ const updateProfile = async (req, res) => {
 
 const bookAppointment = async (req, res) => {
   try {
-    const { userId, docId, slotDate, slotTime } = req.body;
+    const { userId, docId, slotDate, slotTime, customerDetails } = req.body;
+
+    // Validate customer details
+    if (
+      !customerDetails ||
+      !customerDetails.name ||
+      !customerDetails.phone ||
+      !customerDetails.address ||
+      !customerDetails.reason
+    ) {
+      return res.json({
+        success: false,
+        message: "All customer details are required",
+      });
+    }
+
+    // Validate phone number
+    if (!/^\d{10}$/.test(customerDetails.phone)) {
+      return res.json({
+        success: false,
+        message: "Phone number must be exactly 10 digits",
+      });
+    }
+
     const docData = await doctorModel.findById(docId).select("-password");
     if (!docData.available) {
       return res.json({ success: false, message: "Doctor not available" });
     }
+
     let slots_booked = docData.slots_booked;
     if (slots_booked[slotDate]) {
       if (slots_booked[slotDate].includes(slotTime)) {
-        return res.json({ success: false, message: "Doctor not available" });
+        return res.json({ success: false, message: "Slot not available" });
       } else {
         slots_booked[slotDate].push(slotTime);
       }
@@ -184,8 +215,10 @@ const bookAppointment = async (req, res) => {
       slots_booked[slotDate] = [];
       slots_booked[slotDate].push(slotTime);
     }
+
     const userData = await userModel.findById(userId).select("-password");
     delete docData.slots_booked;
+
     const appointmentData = {
       userId,
       docId,
@@ -194,14 +227,17 @@ const bookAppointment = async (req, res) => {
       amount: docData.fees,
       slotTime,
       slotDate,
+      customerDetails, // Include customer details in the appointment
       date: Date.now(),
     };
+
     const newAppointment = new appointmentModel(appointmentData);
     const appointment = await newAppointment.save();
     await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
     res.json({
       success: true,
-      message: "Appointment Booked",
+      message: "Appointment booked successfully",
       appointmentId: appointment._id,
     });
   } catch (error) {

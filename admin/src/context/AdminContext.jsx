@@ -58,37 +58,48 @@ const AdminContextProvider = (props) => {
   };
 
   const getAllAppointments = async () => {
-  try {
-    const { data } = await axios.get(backendUrl + '/api/admin/appointments', {
-      headers: { aToken },
-    });
-     if(data.success) {
-      setAppointments(data.appointments)
-      console.log(data.appointments);
-      
-     }else {
-      toast.error(data.message)
-     }
-  } catch (error) {
-    toast.error(error.message);
-    return { success: false };
-  }
-};
+    try {
+      const { data } = await axios.get(backendUrl + '/api/admin/appointments', {
+        headers: { aToken },
+      });
+      if(data.success) {
+        setAppointments(data.appointments)
+        console.log(data.appointments);
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message);
+      return { success: false };
+    }
+  };
 
   const cancelAppointment = async (appointmentId) => {
-      try {
-        const  {data} = await axios.post(backendUrl+'/api/admin/cancel-appointment',{appointmentId},{headers:{aToken}})
-        if (data.success) {
-          toast.success(data.message)
-          getAllAppointments()
-        } else{
-          toast.error(data.message)
-        }
-        
-      } catch (error) {
-        toast.error(error.message)
-        
+    try {
+      const {data} = await axios.post(backendUrl+'/api/admin/cancel-appointment',{appointmentId},{headers:{aToken}})
+      if (data.success) {
+        toast.success(data.message)
+        getAllAppointments()
+      } else{
+        toast.error(data.message)
       }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  const markAppointmentCompleted = async (appointmentId) => {
+    try {
+      const {data} = await axios.post(backendUrl+'/api/admin/mark-completed',{appointmentId},{headers:{aToken}})
+      if (data.success) {
+        toast.success(data.message)
+        getAllAppointments()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   const getDashData = async () => {
@@ -101,7 +112,6 @@ const AdminContextProvider = (props) => {
       } else{
         toast.error(data.message)
       }
-      
     } catch (error) {
       toast.error(error.message)
     }
@@ -112,10 +122,13 @@ const AdminContextProvider = (props) => {
     setAToken,
     backendUrl,
     doctors,
-    getAllDoctors,changeAvailability,
-    appointments,setAppointments,
+    getAllDoctors,
+    changeAvailability,
+    appointments,
+    setAppointments,
     getAllAppointments,
     cancelAppointment,
+    markAppointmentCompleted,
     dashData,
     getDashData
   };

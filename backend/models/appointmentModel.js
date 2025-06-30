@@ -12,11 +12,20 @@ const appointmentSchema = new mongoose.Schema({
     cancelled:{type:Boolean,default:false},
     // payment:{type:Boolean,default:false},
     isCompleted:{type:Boolean,default:false},
+     isPaid: {
+    type: Boolean,
+    default: false,
+  },
+  isRefunded: {
+    type: Boolean,
+    default: false,
+  },
     customerDetails: {
-        type: Object,
-        required: false, // Set to false initially, as it will be added after booking
-        default: {}
-    }
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    address: { type: String, required: true },
+    reason: { type: String, required: true },
+  },
 
 })
 

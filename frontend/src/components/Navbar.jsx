@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
@@ -8,19 +8,37 @@ const Navbar = () => {
   const { token, setToken, userData } = useContext(AppContext);
   const [showMenu, setShowMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   const logout = () => {
     setToken(false);
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     navigate("/");
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const navItems = [
     { path: "/", label: "HOME" },
     { path: "/about", label: "ABOUT" },
     { path: "/doctors", label: "BOOK DOCTOR" },
     { path: "/blogs", label: "BLOGS" },
-    { path: "/contact", label: "CONTACT" }
+    { path: "/contact", label: "CONTACT" },
   ];
 
   return (
@@ -28,26 +46,26 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
+          <div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <img 
-              className="w-10 h-10" 
-              src="/company-logo.png" 
-              alt="Medicaid Logo" 
+            <img
+              className="w-10 h-10"
+              src="/company-logo.png"
+              alt="Medicaid Logo"
             />
             <span className="text-2xl font-bold text-primary">Medicaid</span>
           </div>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden md:block">
             <ul className="flex items-center space-x-8">
               {navItems.map((item) => (
                 <li key={item.path}>
-                  <NavLink 
-                    to={item.path} 
-                    className={({ isActive }) => 
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
                       `py-2 font-medium text-gray-700 hover:text-primary transition-colors ${
                         isActive ? "text-primary border-b-2 border-primary" : ""
                       }`
@@ -63,25 +81,37 @@ const Navbar = () => {
           {/* Auth Section */}
           <div className="flex items-center gap-6">
             {token && userData ? (
-              <div className="relative">
-                <div 
+              <div className="relative flex items-center gap-3">
+                <span className="hidden md:inline font-medium text-gray-700">
+                  Welcome{" "}
+                  <span className="text-primary font-semibold">
+                    {userData.name}
+                  </span>
+                </span>
+
+                <div
                   className="flex items-center gap-2 cursor-pointer"
                   onClick={() => setShowDropdown(!showDropdown)}
                 >
-                  <img 
-                    className="w-8 h-8 rounded-full object-cover border-2 border-primary" 
-                    src={userData.image} 
-                    alt="User profile" 
+                  <img
+                    className="w-8 h-8 rounded-full object-cover border-2 border-primary"
+                    src={userData.image}
+                    alt="User profile"
                   />
-                  <img 
-                    className={`w-3 transition-transform ${showDropdown ? "rotate-180" : ""}`} 
-                    src={assets.dropdown_icon} 
-                    alt="" 
+                  <img
+                    className={`w-3 transition-transform ${
+                      showDropdown ? "rotate-180" : ""
+                    }`}
+                    src={assets.dropdown_icon}
+                    alt="Dropdown"
                   />
                 </div>
-                
+
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  <div
+                    ref={dropdownRef}
+                    className="absolute right-0 mt-20 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+                  >
                     <button
                       onClick={() => {
                         navigate("/my-profile");
@@ -136,7 +166,11 @@ const Navbar = () => {
           <div className="absolute top-0 right-0 h-full w-4/5 max-w-sm bg-white shadow-xl">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="flex items-center gap-2">
-                <img className="w-10 h-10" src="/company-logo.png" alt="Medicaid Logo" />
+                <img
+                  className="w-10 h-10"
+                  src="/company-logo.png"
+                  alt="Medicaid Logo"
+                />
                 <span className="text-xl font-bold text-primary">Medicaid</span>
               </div>
               <button
@@ -157,7 +191,9 @@ const Navbar = () => {
                       onClick={() => setShowMenu(false)}
                       className={({ isActive }) =>
                         `block px-4 py-2 text-lg font-medium rounded-md ${
-                          isActive ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100"
+                          isActive
+                            ? "bg-primary text-white"
+                            : "text-gray-700 hover:bg-gray-100"
                         }`
                       }
                     >

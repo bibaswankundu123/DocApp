@@ -25,7 +25,6 @@ const Appointment = () => {
     address: "",
     reason: "",
   });
-  const [appointmentId, setAppointmentId] = useState(null);
 
   const fetchDocInfo = async () => {
     const docInfo = doctors.find((doc) => doc._id === docId);
@@ -97,52 +96,54 @@ const Appointment = () => {
       return;
     }
 
-    try {
-      const date = docSlots[slotIndex][0].dateTime;
-
-      let day = date.getDate();
-      let month = date.getMonth() + 1;
-      let year = date.getFullYear();
-
-      const slotDate = day + "_" + month + "_" + year;
-
-      const { data } = await axios.post(
-        backendUrl + "/api/user/book-appointment",
-        { docId, slotDate, slotTime },
-        { headers: { token } }
-      );
-
-      if (data.success) {
-        setAppointmentId(data.appointmentId); // Assuming the backend returns appointmentId
-        setShowModal(true); // Open the modal to collect customer details
-        getDoctorsData();
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
+    // Open the modal to collect details without creating a booking yet
+    setShowModal(true);
   };
 
   const confirmBooking = async () => {
+    // Validate form data
+    if (
+      !formData.name ||
+      !formData.phone ||
+      !formData.address ||
+      !formData.reason
+    ) {
+      toast.error("Please fill out all required fields");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(formData.phone)) {
+      toast.error("Phone number must be exactly 10 digits");
+      return;
+    }
+
     try {
+      const date = docSlots[slotIndex][0].dateTime;
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
+      const slotDate = day + "_" + month + "_" + year;
+
+      // Create the booking with customer details
       const { data } = await axios.post(
-        backendUrl + "/api/user/confirm-booking",
-        { appointmentId, customerDetails: formData },
+        backendUrl + "/api/user/book-appointment",
+        { docId, slotDate, slotTime, customerDetails: formData },
         { headers: { token } }
       );
+
       if (data.success) {
         toast.success(data.message);
         setShowModal(false);
         setFormData({ name: "", phone: "", address: "", reason: "" });
+        setSlotTime(""); // Reset slot selection
+        getDoctorsData();
         navigate("/my-appointments");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -162,6 +163,15 @@ const Appointment = () => {
   useEffect(() => {
     console.log(docSlots);
   }, [docSlots]);
+
+  useEffect(() => {
+  if (showModal) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
+  }
+}, [showModal]);
+
 
   return (
     docInfo && (
@@ -243,7 +253,8 @@ const Appointment = () => {
                   3
                 </span>
                 <span>
-                  Click <strong>"Book an Appointment"</strong> and fill out the form to confirm
+                  Click <strong>"Book an Appointment"</strong> and fill out the
+                  form to confirm
                 </span>
               </li>
             </ol>
@@ -291,7 +302,7 @@ const Appointment = () => {
                 </p>
               ))}
           </div>
-          <button
+          <button type="button"
             onClick={bookAppointment}
             disabled={!slotTime}
             className={`text-sm font-light px-14 py-3 rounded-full my-6 ${
@@ -336,7 +347,14 @@ const Appointment = () => {
                     type="tel"
                     name="phone"
                     value={formData.phone}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                     
+                      if (/^\d{0,10}$/.test(value)) {
+                        setFormData({ ...formData, phone: value });
+                      }
+                    }}
+                    maxLength={10}
                     className="mt-1 p-2 w-full border rounded"
                     required
                   />
@@ -391,4 +409,4 @@ const Appointment = () => {
   );
 };
 
-export default Appointment; 
+export default Appointment;

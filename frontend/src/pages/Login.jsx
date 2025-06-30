@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import axios from 'axios'
+import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const {backendUrl, token, setToken} = useContext(AppContext)
-  const navigate = useNavigate()
+  const { backendUrl, token, setToken } = useContext(AppContext);
+  const navigate = useNavigate();
   const [state, setState] = useState("Sign Up");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -17,33 +17,44 @@ const Login = () => {
     event.preventDefault();
 
     try {
-      if (state === 'Sign Up') {
-        const {data} = await axios.post(backendUrl + '/api/user/register', {name, phone, password, email})
-        if(data.success){
-          localStorage.setItem('token', data.token)
-          setToken(data.token)
+      if (state === "Sign Up") {
+        const { data } = await axios.post(backendUrl + "/api/user/register", {
+          name,
+          phone,
+          password,
+          email,
+        });
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+          setToken(data.token);
+          toast.success("Account created successfully");
         } else {
-          toast.error(data.message)
+          toast.error(data.message);
         }
       } else {
-        const {data} = await axios.post(backendUrl + '/api/user/login', { password, email, phone })
-        if(data.success){
-          localStorage.setItem('token', data.token)
-          setToken(data.token)
+        const { data } = await axios.post(backendUrl + "/api/user/login", {
+          password,
+          email,
+          phone,
+        });
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+          setToken(data.token);
+          toast.success("Logged in successfully");
         } else {
-          toast.error(data.message)
+          toast.error(data.message);
         }
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
   };
 
   useEffect(() => {
     if (token) {
-      navigate('/')
+      navigate("/");
     }
-  }, [token])
+  }, [token]);
 
   return (
     <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
@@ -52,7 +63,8 @@ const Login = () => {
           {state === "Sign Up" ? "Create Account" : "Login"}
         </p>
         <p>
-          Please {state === "Sign Up" ? "sign up" : "Log in"} to book appointment
+          Please {state === "Sign Up" ? "sign up" : "Log in"} to book
+          appointment
         </p>
         {state === "Sign Up" && (
           <>
@@ -73,24 +85,51 @@ const Login = () => {
                 className="border border-zinc-300 rounded w-full p-2 mt-1"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  if (/^\d{0,10}$/.test(input)) {
+                    setPhone(input);
+                  }
+                }}
                 placeholder="Enter your phone number"
                 required
               />
             </div>
           </>
         )}
-        <div className="w-full">
-          <p>{state === "Sign Up" ? "Email (Optional)" : "Email or Phone Number"}</p>
-          <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
-            type={state === "Sign Up" ? "email" : "text"}
-            value={state === "Sign Up" ? email : (email || phone)}
-            onChange={(e) => state === "Sign Up" ? setEmail(e.target.value) : (validator.isEmail(e.target.value) ? setEmail(e.target.value) : setPhone(e.target.value))}
-            placeholder={state === "Sign Up" ? "Enter your email (optional)" : "Enter your email or phone number"}
-            required={state !== "Sign Up"}
-          />
-        </div>
+        {state === "Sign Up" ? (
+          <div className="w-full">
+            <p>Email (Optional)</p>
+            <input
+              className="border border-zinc-300 rounded w-full p-2 mt-1"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email (optional)"
+            />
+          </div>
+        ) : (
+          <div className="w-full">
+            <p>Email or Phone Number</p>
+            <input
+              className="border border-zinc-300 rounded w-full p-2 mt-1"
+              type="text"
+              value={email || phone}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d+$/.test(val)) {
+                  setPhone(val);
+                  setEmail("");
+                } else {
+                  setEmail(val);
+                  setPhone("");
+                }
+              }}
+              placeholder="Enter your email or phone number"
+              required
+            />
+          </div>
+        )}
         <div className="w-full">
           <p>Password</p>
           <input
@@ -102,7 +141,10 @@ const Login = () => {
             required
           />
         </div>
-        <button type="submit" className="bg-primary text-white w-full py-2 rounded-md text-base">
+        <button
+          type="submit"
+          className="bg-primary text-white w-full py-2 rounded-md text-base"
+        >
           {state === "Sign Up" ? "Create Account" : "Login"}
         </button>
         {state === "Sign Up" ? (
