@@ -14,6 +14,7 @@ import { DoctorContext } from './context/DoctorContext';
 import DoctorAppointments from './pages/Doctor/DoctorAppointments';
 import DoctorProfile from './pages/Doctor/DoctorProfile';
 import ContactMessages from './pages/Admin/ContactMessages';
+import Reports from './pages/Admin/Reports';
   
 
 const App = () => {
@@ -55,6 +56,7 @@ const App = () => {
           <Route path='/all-appointments' element={<AllAppointments/>} />
           <Route path='/add-doctor' element={<AddDoctor/>} />
           <Route path='/doctor-list' element={<DoctorsList/>} />
+          <Route path='/reports' element={<Reports/>} />
 
 
           <Route path='/doctor-dashboard' element={<DoctorDashboard/>} />

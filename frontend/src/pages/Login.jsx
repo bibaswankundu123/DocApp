@@ -12,6 +12,8 @@ const Login = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -50,6 +52,24 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (event) => {
+    event.preventDefault();
+    try {
+      const { data } = await axios.post(backendUrl + "/api/user/forgot-password", {
+        email: resetEmail,
+      });
+      if (data.success) {
+        toast.success("Password reset link sent to your email");
+        setShowResetForm(false);
+        setResetEmail("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       navigate("/");
@@ -57,16 +77,29 @@ const Login = () => {
   }, [token]);
 
   return (
-    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
+    <form onSubmit={showResetForm ? handleForgotPassword : onSubmitHandler} className="min-h-[80vh] flex items-center">
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
         <p className="text-2xl font-semibold">
-          {state === "Sign Up" ? "Create Account" : "Login"}
+          {showResetForm ? "Reset Password" : state === "Sign Up" ? "Create Account" : "Login"}
         </p>
         <p>
-          Please {state === "Sign Up" ? "sign up" : "Log in"} to book
-          appointment
+          {showResetForm
+            ? "Enter your email to receive a password reset link"
+            : `Please ${state === "Sign Up" ? "sign up" : "log in"} to book appointment`}
         </p>
-        {state === "Sign Up" && (
+        {showResetForm ? (
+          <div className="w-full">
+            <p>Email</p>
+            <input
+              className="border border-zinc-300 rounded w-full p-2 mt-1"
+              type="email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+        ) : state === "Sign Up" ? (
           <>
             <div className="w-full">
               <p>Full Name</p>
@@ -95,19 +128,17 @@ const Login = () => {
                 required
               />
             </div>
+            <div className="w-full">
+              <p>Email (Optional)</p>
+              <input
+                className="border border-zinc-300 rounded w-full p-2 mt-1"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email (optional)"
+              />
+            </div>
           </>
-        )}
-        {state === "Sign Up" ? (
-          <div className="w-full">
-            <p>Email (Optional)</p>
-            <input
-              className="border border-zinc-300 rounded w-full p-2 mt-1"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email (optional)"
-            />
-          </div>
         ) : (
           <div className="w-full">
             <p>Email or Phone Number</p>
@@ -130,22 +161,24 @@ const Login = () => {
             />
           </div>
         )}
-        <div className="w-full">
-          <p>Password</p>
-          <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            required
-          />
-        </div>
+        {!showResetForm && (
+          <div className="w-full">
+            <p>Password</p>
+            <input
+              className="border border-zinc-300 rounded w-full p-2 mt-1"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+        )}
         <button
           type="submit"
           className="bg-primary text-white w-full py-2 rounded-md text-base"
         >
-          {state === "Sign Up" ? "Create Account" : "Login"}
+          {showResetForm ? "Send Reset Link" : state === "Sign Up" ? "Create Account" : "Login"}
         </button>
         {state === "Sign Up" ? (
           <p>
@@ -158,13 +191,37 @@ const Login = () => {
             </span>
           </p>
         ) : (
+          <>
+            <p>
+              Create a new account?{" "}
+              <span
+                onClick={() => setState("Sign Up")}
+                className="text-primary underline cursor-pointer"
+              >
+                Click here
+              </span>
+            </p>
+            {!showResetForm && (
+              <p>
+                Forgot your password?{" "}
+                <span
+                  onClick={() => setShowResetForm(true)}
+                  className="text-primary underline cursor-pointer"
+                >
+                  Reset here
+                </span>
+              </p>
+            )}
+          </>
+        )}
+        {showResetForm && (
           <p>
-            Create a new account?{" "}
+            Back to login?{" "}
             <span
-              onClick={() => setState("Sign Up")}
+              onClick={() => setShowResetForm(false)}
               className="text-primary underline cursor-pointer"
             >
-              Click here
+              Login here
             </span>
           </p>
         )}

@@ -165,7 +165,7 @@ const Contact = () => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Phone Support</h3>
-          <p className="text-gray-600">9434251779</p>
+          <p className="text-gray-600"> <span>7585817053 / 03412301000 / 03412303612</span></p>
           <p className="text-gray-600">Mon-Fri, 8am-6pm</p>
         </div>
 

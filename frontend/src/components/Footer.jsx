@@ -19,15 +19,27 @@ const Footer = () => {
         </div>
 
         {/* Company Links */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Company</h3>
-          <ul className="space-y-2 text-sm">
-            <li className="hover:text-black cursor-pointer">Home</li>
-            <li className="hover:text-black cursor-pointer">About Us</li>
-            <li className="hover:text-black cursor-pointer">Contact Us</li>
-            <li className="hover:text-black cursor-pointer">Privacy Policy</li>
-          </ul>
-        </div>
+      <div>
+  <h3 className="text-lg font-semibold mb-4 text-gray-800">Company</h3>
+  <ul className="space-y-2 text-sm text-gray-600">
+    <li>
+      <a href="/" className="hover:text-black">Home</a>
+    </li>
+    <li>
+      <a href="/about" className="hover:text-black">About Us</a>
+    </li>
+    <li>
+      <a href="/contact" className="hover:text-black">Contact Us</a>
+    </li>
+    <li>
+      <a href="#" className="hover:text-black">Privacy Policy</a>
+    </li>
+    <li>
+      <a href="https://docapp-admin.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:text-black">Admin Login</a>
+    </li>
+  </ul>
+</div>
+
 
         {/* Contact Info */}
         <div>
@@ -35,7 +47,7 @@ const Footer = () => {
             Get in Touch
           </h3>
           <ul className="space-y-2 text-sm">
-            <li>📞 9434251779</li>
+            <li>📞  <span>7585817053 / 03412301000 / 03412303612</span></li>
             <li>✉️ msmedicaid.asansol98@gmail.com</li>
             <li>
               📍 132/60(88/1) Room No-1, Ward No-46, SB Gorai Road Asansol-,<br />

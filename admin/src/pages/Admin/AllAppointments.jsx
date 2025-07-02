@@ -40,15 +40,17 @@ const AllAppointments = () => {
 
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "unpaid" && !appointment.isPaid && !appointment.isRefunded) ||
-      (statusFilter === "paid" && appointment.isPaid && !appointment.isRefunded) ||
-      (statusFilter === "refund" && appointment.isRefunded);
+      (statusFilter === "unpaid" && appointment.status === "Unpaid") ||
+      (statusFilter === "paid" && appointment.status === "Paid") ||
+      (statusFilter === "cancelled" && appointment.status === "Cancelled") ||
+      (statusFilter === "cancelled_with_refunded" && appointment.status === "Cancelled with Refund") ||
+      (statusFilter === "cancelled_with_paid" && appointment.status === "Cancelled with Paid");
 
     const matchesDate = dateFilter ? appointment.slotDate === dateFilter : true;
     const matchesDoctor = doctorFilter ? appointment.docData.name === doctorFilter : true;
 
     return matchesSearch && matchesStatus && matchesDate && matchesDoctor;
-  });
+  }).slice().reverse();
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -65,9 +67,10 @@ const AllAppointments = () => {
     }
   };
 
-  const handleCancel = (appointmentId) => {
+  const handleCancel = async (appointmentId) => {
     if (window.confirm("Are you sure you want to cancel this appointment?")) {
-      cancelAppointment(appointmentId);
+      const refund = window.confirm("Would you like to refund this appointment?");
+      await cancelAppointment(appointmentId, refund);
     }
   };
 
@@ -120,7 +123,9 @@ const AllAppointments = () => {
             <option value="all">All Status</option>
             <option value="unpaid">Unpaid</option>
             <option value="paid">Paid</option>
-            <option value="refund">Refund</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="cancelled_with_refunded">Cancelled with Refund</option>
+            <option value="cancelled_with_paid">Cancelled with Paid</option>
           </select>
 
           {/* Date Filter */}
@@ -209,22 +214,18 @@ const AllAppointments = () => {
                 {currency}{item.amount}
               </p>
               <div className="col-span-1">
-                {item.isRefunded8592 ? (
-                  <span className="text-red-500 text-xs font-medium px-3 py-1 rounded-full bg-red-50">
-                    Refund
-                  </span>
-                ) : item.isPaid ? (
-                  <span className="text-green-500 text-xs font-medium px-3 py-1 rounded-full bg-green-50">
-                    Paid
-                  </span>
-                ) : (
-                  <span className="text-blue-500 text-xs font-medium px-3 py-1 rounded-full bg-blue-50">
-                    Unpaid
-                  </span>
-                )}
+                <span className={`text-xs font-medium px-3 py-1 rounded-full ${
+                  item.status === "Unpaid" ? "text-blue-500 bg-blue-50" :
+                  item.status === "Paid" ? "text-green-500 bg-green-50" :
+                  item.status === "Cancelled" ? "text-red-500 bg-red-50" :
+                  item.status === "Cancelled with Refund" ? "text-red-500 bg-red-50" :
+                  "text-orange-500 bg-orange-50"
+                }`}>
+                  {item.status}
+                </span>
               </div>
               <div className="col-span-1 flex justify-end gap-2">
-                {!item.isPaid && !item.isRefunded && (
+                {item.status === "Unpaid" && (
                   <>
                     <button
                       onClick={() => handleMarkPaid(item._id)}

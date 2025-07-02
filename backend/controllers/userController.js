@@ -6,6 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "./../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import contactModel from "../models/contactModel.js";
+import nodemailer from "nodemailer";
 
 // API to register a new user
 const registerUser = async (req, res) => {
@@ -128,6 +129,133 @@ const loginUser = async (req, res) => {
     });
   }
 };
+
+// API to handle forgot password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.json({
+        success: false,
+        message: "Invalid Email",
+      });
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Save token and expiry to user
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send reset email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: "bibaswan.softech@gmail.com",
+        pass: "qpux abgd tjet ohry",
+      },
+    });
+
+    const mailOptions = {
+      to: email,
+      from: "bibaswan.softech@gmail.com",
+      subject: "Password Reset Request",
+      text: `You are receiving this email because you (or someone else) requested a password reset for your account.\n\n
+      Please click on the following link, or paste it into your browser to reset your password:\n\n
+      ${process.env.FRONTEND_URL}/reset-password/${resetToken}\n\n
+      If you did not request this, please ignore this email.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      success: true,
+      message: "Password reset link sent to your email",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// API to reset password
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.json({
+        success: false,
+        message: "Password is required",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    const user = await userModel.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update password and clear reset token
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 const getProfile = async (req, res) => {
   try {
@@ -273,6 +401,7 @@ const cancelAppointment = async (req, res) => {
     }
     await appointmentModel.findByIdAndUpdate(appointmentId, {
       cancelled: true,
+      status: "Cancelled",
     });
     const { docId, slotDate, slotTime } = appointmentData;
     const doctorData = await doctorModel.findById(docId);
@@ -366,5 +495,7 @@ export {
   listAppointment,
   cancelAppointment,
   confirmBooking,
-  submitContactForm
+  submitContactForm,
+  forgotPassword,
+  resetPassword
 };

@@ -20,6 +20,11 @@ const appointmentSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+status: {
+        type: String,
+        enum: ["Unpaid", "Paid", "Cancelled", "Cancelled with Refund", "Cancelled with Paid"],
+        default: "Unpaid",
+    },
     customerDetails: {
     name: { type: String, required: true },
     phone: { type: String, required: true },

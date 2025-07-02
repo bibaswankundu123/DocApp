@@ -132,6 +132,108 @@ const allDoctors = async (req, res) => {
   }
 };
 
+// API to update doctor details
+const updateDoctor = async (req, res) => {
+  try {
+    const {
+      docId,
+      name,
+      email,
+      password,
+      speciality,
+      degree,
+      experience,
+      about,
+      fees,
+      address,
+    } = req.body;
+    const imageFile = req.file;
+
+    // Validate required fields
+    if (!docId || !name || !email || !speciality || !degree || !experience || !about || !fees || !address) {
+      return res.json({ success: false, message: "Missing details" });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.json({ success: false, message: "Invalid email" });
+    }
+
+    const doctor = await doctorModel.findById(docId);
+    if (!doctor) {
+      return res.json({ success: false, message: "Doctor not found" });
+    }
+
+    const updateData = {
+      name,
+      email,
+      speciality,
+      degree,
+      experience,
+      about,
+      fees,
+      address: JSON.parse(address),
+    };
+
+    // Update password if provided
+    if (password && password.length >= 8) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    // Update image if provided
+    if (imageFile) {
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      updateData.image = imageUpload.secure_url;
+    }
+
+    await doctorModel.findByIdAndUpdate(docId, updateData);
+    res.json({
+      success: true,
+      message: "Doctor updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// API to delete a doctor
+const deleteDoctor = async (req, res) => {
+  try {
+    const { docId } = req.body;
+    const doctor = await doctorModel.findById(docId);
+    if (!doctor) {
+      return res.json({ success: false, message: "Doctor not found" });
+    }
+
+    // Check if doctor has active appointments
+    const appointments = await appointmentModel.find({ docId, status: { $in: ["Unpaid", "Paid"] } });
+    if (appointments.length > 0) {
+      return res.json({
+        success: false,
+        message: "Cannot delete doctor with active appointments",
+      });
+    }
+
+    await doctorModel.findByIdAndDelete(docId);
+    res.json({
+      success: true,
+      message: "Doctor deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // API to get all appointment list
 const appointmentsAdmin = async (req, res) => {
   try {
@@ -149,14 +251,21 @@ const appointmentsAdmin = async (req, res) => {
 // API for appointment cancellation
 const appointmentCancel = async (req, res) => {
   try {
-    const { appointmentId } = req.body;
+    const { appointmentId, refund } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
+    if (!appointmentData) {
+      return res.json({ success: false, message: "Appointment not found" });
+    }
 
-    await appointmentModel.findByIdAndUpdate(appointmentId, {
-      isRefunded: true,
-    });
+    const updateData = {
+      cancelled: true,
+      isRefunded: refund,
+      status: refund ? "Cancelled with Refund" : "Cancelled with Paid",
+    };
 
-    // releasing doctor slot
+    await appointmentModel.findByIdAndUpdate(appointmentId, updateData);
+
+    // Releasing doctor slot
     const { docId, slotDate, slotTime } = appointmentData;
     const doctorData = await doctorModel.findById(docId);
     let slots_booked = doctorData.slots_booked;
@@ -166,7 +275,10 @@ const appointmentCancel = async (req, res) => {
 
     await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-    res.json({ success: true, message: "Appointment Cancelled and Refunded" });
+    res.json({
+      success: true,
+      message: `Appointment cancelled ${refund ? "with refund" : "without refund"}`,
+    });
   } catch (error) {
     console.log(error);
     res.json({
@@ -180,8 +292,14 @@ const appointmentCancel = async (req, res) => {
 const markAppointmentCompleted = async (req, res) => {
   try {
     const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (!appointmentData) {
+      return res.json({ success: false, message: "Appointment not found" });
+    }
+
     await appointmentModel.findByIdAndUpdate(appointmentId, {
       isPaid: true,
+      status: "Paid",
     });
 
     res.json({ success: true, message: "Appointment marked as Paid" });
@@ -201,11 +319,78 @@ const adminDashboard = async (req, res) => {
     const users = await userModel.find({});
     const appointments = await appointmentModel.find({});
 
+    // Calculate total collection (Paid + Cancelled with Paid)
+    const totalCollection = await appointmentModel.aggregate([
+      {
+        $match: {
+          status: { $in: ["Paid", "Cancelled with Paid"] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    // Calculate month-wise report
+    const monthWiseReport = await appointmentModel.aggregate([
+      {
+        $match: {
+          status: { $in: ["Paid", "Cancelled with Paid"] },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: { $toDate: "$date" } },
+            month: { $month: { $toDate: "$date" } },
+          },
+          total: { $sum: "$amount" },
+        },
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 },
+      },
+    ]);
+
+    // Calculate today's collection
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todaysCollection = await appointmentModel.aggregate([
+      {
+        $match: {
+          status: { $in: ["Paid", "Cancelled with Paid"] },
+          date: {
+            $gte: today.getTime(),
+            $lt: tomorrow.getTime(),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+
     const dashData = {
       doctors: doctors.length,
       appointments: appointments.length,
       patients: users.length,
       latestAppointments: appointments.reverse().slice(0, 5),
+      totalCollection: totalCollection.length > 0 ? totalCollection[0].total : 0,
+      monthWiseReport: monthWiseReport.map(item => ({
+        year: item._id.year,
+        month: item._id.month,
+        total: item.total,
+      })),
+      todaysCollection: todaysCollection.length > 0 ? todaysCollection[0].total : 0,
     };
 
     res.json({ success: true, dashData });
@@ -217,7 +402,6 @@ const adminDashboard = async (req, res) => {
     });
   }
 };
-
 // API to get all contact messages
 const getAllContactMessages = async (req, res) => {
   try {
@@ -232,14 +416,15 @@ const getAllContactMessages = async (req, res) => {
   }
 };
 
-
 export {
   addDoctor,
   loginAdmin,
   allDoctors,
+  updateDoctor,
+  deleteDoctor,
   appointmentsAdmin,
   appointmentCancel,
   markAppointmentCompleted,
   adminDashboard,
-  getAllContactMessages
+  getAllContactMessages,
 };
