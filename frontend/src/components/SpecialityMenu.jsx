@@ -1,10 +1,11 @@
-import React from "react";
+// SpecialityMenu.jsx
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { specialityData } from "../assets/assets";
-
-
+import { AppContext } from "../context/AppContext";
 
 const SpecialityMenu = () => {
+  const { specialties } = useContext(AppContext);
+
   return (
     <div id="speciality" className="px-6 md:px-10 lg:px-20 py-14">
       {/* Heading */}
@@ -20,20 +21,22 @@ const SpecialityMenu = () => {
 
       {/* Speciality Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        {specialityData.map((item, index) => (
+        {specialties.map((item) => (
           <Link  
-             onClick={() =>scrollTo(0,0)}
-            to={`/doctors/${item.speciality}`}
-            key={index}
+            onClick={() => window.scrollTo(0, 0)}
+            to={`/doctors/${item.name}`}
+            key={item._id}
             className="flex flex-col items-center text-center bg-white rounded-xl p-4 shadow hover:shadow-lg transition-all duration-300 hover:scale-105"
           >
-            <img
-              src={item.image}
-              alt={item.speciality}
-              className="w-20 h-20 object-contain mb-2"
-            />
+            {item.image && (
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-20 h-20 object-contain mb-2"
+              />
+            )}
             <p className="text-sm font-medium text-gray-700">
-              {item.speciality}
+              {item.name}
             </p>
           </Link>
         ))}

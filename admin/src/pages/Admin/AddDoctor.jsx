@@ -1,23 +1,28 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { assets } from "./../../assets/assets";
 import { AdminContext } from "./../../context/AdminContext";
 import { toast } from "react-toastify";
-import  axios  from "axios";
+import axios from "axios";
 
 const AddDoctor = () => {
   const [docImg, setDocImg] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [experience, setExperience] = useState("1 Year");
+  const [experience, setExperience] = useState("");
   const [fees, setFees] = useState("");
   const [about, setAbout] = useState("");
-  const [speciality, setSpeciality] = useState("General physician");
+  const [speciality, setSpeciality] = useState("");
   const [degree, setDegree] = useState("");
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
 
-  const { backendUrl, aToken } = useContext(AdminContext);
+  const { backendUrl, aToken, specialties, getSpecialties } =
+    useContext(AdminContext);
+
+  useEffect(() => {
+    getSpecialties();
+  }, []);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -65,13 +70,14 @@ const AddDoctor = () => {
         setDegree("");
         setAbout("");
         setFees("");
-       
+        setExperience("");
+        setSpeciality("");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
-      console.log(error)
+      toast.error(error.message);
+      console.log(error);
     }
   };
 
@@ -136,27 +142,14 @@ const AddDoctor = () => {
 
             <div className="flex-1 flex flex-col gap-1">
               <p>Experience</p>
-              <select
+              <input
                 onChange={(e) => setExperience(e.target.value)}
                 value={experience}
                 className="border rounded px-3 py-2"
-                name=""
-                id=""
-              >
-                <option value="" disabled selected>
-                  Select Experience
-                </option>
-                <option value="1 Year">1 Year</option>
-                <option value="2 Year">2 Years</option>
-                <option value="3 Year">3 Years</option>
-                <option value="4 Year">4 Years</option>
-                <option value="5 Year">5 Years</option>
-                <option value="6 Year">6 Years</option>
-                <option value="7 Year">7 Years</option>
-                <option value="8 Year">8 Years</option>
-                <option value="9 Year">9 Years</option>
-                <option value="10 Year">10 Years</option>
-              </select>
+                type="text"
+                placeholder="e.g. 5 years"
+                required
+              />
             </div>
 
             <div className="flex-1 flex flex-col gap-1">
@@ -179,18 +172,16 @@ const AddDoctor = () => {
                 onChange={(e) => setSpeciality(e.target.value)}
                 value={speciality}
                 className="border rounded px-3 py-2"
-                name=""
-                id=""
+                required
               >
                 <option value="" disabled selected>
                   Select Speciality
                 </option>
-                <option value="General Physician">General Physician</option>
-                <option value="Gynecologist">Gynecologist</option>
-                <option value="Dermatologist">Dermatologist</option>
-                <option value="Pediatrician">Pediatrician</option>
-                <option value="Neurologist">Neurologist</option>
-                <option value="Gastroenterologist">Gastroenterologist</option>
+                {specialties.map((spec) => (
+                  <option key={spec._id} value={spec.name}>
+                    {spec.name}
+                  </option>
+                ))}
               </select>
             </div>
 

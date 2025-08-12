@@ -486,6 +486,16 @@ const submitContactForm = async (req, res) => {
   }
 };
 
+ const getSpecialtiesPublic = async (req, res) => {
+  try {
+    const specialties = await Specialty.find({}).sort({ name: 1 });
+    res.json({ success: true, specialties });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -497,5 +507,6 @@ export {
   confirmBooking,
   submitContactForm,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getSpecialtiesPublic
 };

@@ -15,6 +15,7 @@ import DoctorAppointments from './pages/Doctor/DoctorAppointments';
 import DoctorProfile from './pages/Doctor/DoctorProfile';
 import ContactMessages from './pages/Admin/ContactMessages';
 import Reports from './pages/Admin/Reports';
+import AddSpecialty from './pages/Admin/AddSpecialty';
   
 
 const App = () => {
@@ -57,7 +58,7 @@ const App = () => {
           <Route path='/add-doctor' element={<AddDoctor/>} />
           <Route path='/doctor-list' element={<DoctorsList/>} />
           <Route path='/reports' element={<Reports/>} />
-
+          <Route path='/add-specialty' element={<AddSpecialty/>} />
 
           <Route path='/doctor-dashboard' element={<DoctorDashboard/>} />
           <Route path='/doctor-appointments' element={<DoctorAppointments/>} />

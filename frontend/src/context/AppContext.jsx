@@ -1,3 +1,4 @@
+// AppContext.jsx
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import {toast} from 'react-toastify';
@@ -6,71 +7,83 @@ export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
   const currencySymbol = "₹";
-
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [doctors,setDoctors] = useState([])
-
-  const [token,setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):false)
-
-  const [userData,setUserData] = useState(false)
-  
+  const [doctors, setDoctors] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : false);
+  const [userData, setUserData] = useState(false);
 
   const getDoctorsData = async () => {
     try {
-     const {data} = await axios.get(backendUrl + '/api/doctor/list');
-     if(data.success){
+      const {data} = await axios.get(backendUrl + '/api/doctor/list');
+      if(data.success) {
         setDoctors(data.doctors);
-     } else {
+      } else {
         toast.error(data.message);
-     }
+      }
     } catch (error) {
-   
-       console.log(error)
-       toast.error(error.message)
+      console.log(error);
+      toast.error(error.message);
     }
-  }
+  };
 
-  const  loadUserProfileData = async () => {
+  const getSpecialties = async () => {
     try {
-       
-        const {data} =  await axios.get(backendUrl + '/api/user/get-profile',{headers:{token}})
-        if (data.success) {
-      setUserData({
-        ...data.userData,
-        gender: data.userData.gender || "Male", 
-      });
-        }else{
-          toast.error(data.message)
-        }
-      
+      const {data} = await axios.get(backendUrl + '/api/admin/specialties');
+      if(data.success) {
+        setSpecialties(data.specialties);
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
-       console.log(error)
-       toast.error(error.message)
+      console.log(error);
+      toast.error(error.message);
     }
-  }
+  };
+
+  const loadUserProfileData = async () => {
+    try {
+      const {data} = await axios.get(backendUrl + '/api/user/get-profile', {headers: {token}});
+      if (data.success) {
+        setUserData({
+          ...data.userData,
+          gender: data.userData.gender || "Male",
+        });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
 
   const value = {
-    doctors,getDoctorsData,
+    doctors,
+    getDoctorsData,
+    specialties,
+    getSpecialties,
     currencySymbol,
-    token,setToken,
+    token,
+    setToken,
     backendUrl,
-    userData,setUserData,
+    userData,
+    setUserData,
     loadUserProfileData
-
-  }
+  };
 
   useEffect(() => {
     getDoctorsData();
+    getSpecialties();
   }, []);
 
-   useEffect(()=>{
-    if(token ){
-      loadUserProfileData()
+  useEffect(() => {
+    if(token) {
+      loadUserProfileData();
     } else {
-      setUserData(false)
+      setUserData(false);
     }
-      
-   },[token])
+  }, [token]);
 
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>

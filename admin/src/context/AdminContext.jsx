@@ -11,7 +11,54 @@ const AdminContextProvider = (props) => {
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
+  const [specialties, setSpecialties] = useState([]);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const addSpecialty = async (formData) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/add-specialty",
+        formData,
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getSpecialties();
+      }
+      return data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const getSpecialties = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + "/api/admin/specialties", {
+        headers: { aToken },
+      });
+      if (data.success) {
+        setSpecialties(data.specialties);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const deleteSpecialty = async (id) => {
+    try {
+      const { data } = await axios.delete(
+        `${backendUrl}/api/admin/specialties/${id}`,
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getSpecialties();
+      }
+      return data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const getAllDoctors = async () => {
     try {
@@ -88,7 +135,7 @@ const AdminContextProvider = (props) => {
 
   const getAllAppointments = async () => {
     try {
-      const { data } = await axios.get(backendUrl + '/api/admin/appointments', {
+      const { data } = await axios.get(backendUrl + "/api/admin/appointments", {
         headers: { aToken },
       });
       if (data.success) {
@@ -106,7 +153,7 @@ const AdminContextProvider = (props) => {
   const cancelAppointment = async (appointmentId, refund) => {
     try {
       const { data } = await axios.post(
-        backendUrl + '/api/admin/cancel-appointment',
+        backendUrl + "/api/admin/cancel-appointment",
         { appointmentId, refund },
         { headers: { aToken } }
       );
@@ -124,7 +171,7 @@ const AdminContextProvider = (props) => {
   const markAppointmentCompleted = async (appointmentId) => {
     try {
       const { data } = await axios.post(
-        backendUrl + '/api/admin/mark-completed',
+        backendUrl + "/api/admin/mark-completed",
         { appointmentId },
         { headers: { aToken } }
       );
@@ -141,7 +188,7 @@ const AdminContextProvider = (props) => {
 
   const getDashData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + '/api/admin/dashboard', {
+      const { data } = await axios.get(backendUrl + "/api/admin/dashboard", {
         headers: { aToken },
       });
       if (data.success) {
@@ -171,6 +218,10 @@ const AdminContextProvider = (props) => {
     markAppointmentCompleted,
     dashData,
     getDashData,
+    specialties,
+    addSpecialty,
+    getSpecialties,
+    deleteSpecialty,
   };
 
   return (

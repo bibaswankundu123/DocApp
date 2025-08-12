@@ -7,6 +7,23 @@ import appointmentModel from "./../models/appointmentModel.js";
 import userModel from "./../models/userModel.js";
 import contactModel from "../models/contactModel.js";
 
+
+const getSpecialities = async (req, res) => {
+  try {
+    const specialities = await doctorModel.distinct("speciality");
+
+    res.json({
+      success: true,
+      specialities,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // API FOR ADDING DOCTOR
 const addDoctor = async (req, res) => {
   try {
@@ -417,6 +434,7 @@ const getAllContactMessages = async (req, res) => {
 };
 
 export {
+  getSpecialities,
   addDoctor,
   loginAdmin,
   allDoctors,
