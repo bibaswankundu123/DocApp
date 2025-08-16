@@ -333,15 +333,18 @@ const bookAppointment = async (req, res) => {
       return res.json({ success: false, message: "Doctor not available" });
     }
 
+    // Check if slot is in availableSlots
+    if (!docData.availableSlots[slotDate] || !docData.availableSlots[slotDate].includes(slotTime)) {
+      return res.json({ success: false, message: "Slot not available" });
+    }
+
     let slots_booked = docData.slots_booked;
-    if (slots_booked[slotDate]) {
-      if (slots_booked[slotDate].includes(slotTime)) {
-        return res.json({ success: false, message: "Slot not available" });
-      } else {
-        slots_booked[slotDate].push(slotTime);
-      }
+    if (slots_booked[slotDate] && slots_booked[slotDate].includes(slotTime)) {
+      return res.json({ success: false, message: "Slot not available" });
     } else {
-      slots_booked[slotDate] = [];
+      if (!slots_booked[slotDate]) {
+        slots_booked[slotDate] = [];
+      }
       slots_booked[slotDate].push(slotTime);
     }
 

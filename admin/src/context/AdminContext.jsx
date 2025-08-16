@@ -202,6 +202,25 @@ const AdminContextProvider = (props) => {
     }
   };
 
+  const addDoctorSchedule = async (docId, date, timeSlots) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/add-schedule",
+        { docId, date, timeSlots },
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getAllDoctors(); // Refresh doctors to get updated schedules
+      } else {
+        toast.error(data.message);
+      }
+      return data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const value = {
     aToken,
     setAToken,
@@ -222,6 +241,7 @@ const AdminContextProvider = (props) => {
     addSpecialty,
     getSpecialties,
     deleteSpecialty,
+    addDoctorSchedule
   };
 
   return (

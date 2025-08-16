@@ -56,6 +56,10 @@ const doctorSchema = new mongoose.Schema({
     type: Object,
     default: {}
   },
+  availableSlots: {
+    type: Object,
+    default: {}
+  },
 }, { minimize: false });
 
 const doctorModel = mongoose.models.doctor || mongoose.model('doctor', doctorSchema);

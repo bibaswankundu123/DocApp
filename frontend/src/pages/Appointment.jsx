@@ -34,53 +34,39 @@ const Appointment = () => {
   const getAvailableSlots = async () => {
     setDocSlots([]);
 
+    // Get dates
     let today = new Date();
 
     for (let i = 0; i < 7; i++) {
+      // Get current date with index
       let currentDate = new Date(today);
       currentDate.setDate(today.getDate() + i);
-      let endTime = new Date();
-      endTime.setDate(today.getDate() + i);
-      endTime.setHours(21, 0, 0, 0);
 
-      if (today.getDate() === currentDate.getDate()) {
-        currentDate.setHours(
-          currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10
-        );
-        currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0);
-      } else {
-        currentDate.setHours(10);
-        currentDate.setMinutes(0);
-      }
+      // Setting date month year value
+      let day = currentDate.getDate();
+      let month = currentDate.getMonth() + 1;
+      let year = currentDate.getFullYear();
 
+      const slotDate = day + "_" + month + "_" + year;
+
+      // Get available times for the date
       let timeSlots = [];
-      while (currentDate < endTime) {
-        let formattedTime = currentDate.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
+
+      if (docInfo.availableSlots && docInfo.availableSlots[slotDate]) {
+        docInfo.availableSlots[slotDate].forEach((time) => {
+          const isBooked =
+            docInfo.slots_booked[slotDate] &&
+            docInfo.slots_booked[slotDate].includes(time);
+
+          if (!isBooked) {
+            timeSlots.push({
+              dateTime: new Date(`${year}-${month}-${day}`), // For display purposes
+              time: time,
+            });
+          }
         });
-
-        let day = currentDate.getDate();
-        let month = currentDate.getMonth() + 1;
-        let year = currentDate.getFullYear();
-
-        const slotDate = day + "_" + month + "_" + year;
-        const slotTime = formattedTime;
-
-        const isSlotAvailable =
-          docInfo.slots_booked[slotDate] &&
-          docInfo.slots_booked[slotDate].includes(slotTime)
-            ? false
-            : true;
-
-        if (isSlotAvailable) {
-          timeSlots.push({
-            dateTime: new Date(currentDate),
-            time: formattedTime,
-          });
-        }
-        currentDate.setMinutes(currentDate.getMinutes() + 30);
       }
+
       setDocSlots((prev) => [...prev, timeSlots]);
     }
   };
@@ -157,7 +143,9 @@ const Appointment = () => {
   }, [doctors, docId]);
 
   useEffect(() => {
-    getAvailableSlots();
+    if (docInfo) {
+      getAvailableSlots();
+    }
   }, [docInfo]);
 
   useEffect(() => {
@@ -165,13 +153,12 @@ const Appointment = () => {
   }, [docSlots]);
 
   useEffect(() => {
-  if (showModal) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "auto";
-  }
-}, [showModal]);
-
+    if (showModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [showModal]);
 
   return (
     docInfo && (
@@ -259,7 +246,7 @@ const Appointment = () => {
               </li>
             </ol>
           </div>
-          {slotTime && (
+          {slotTime && docSlots[slotIndex] && docSlots[slotIndex][0] && (
             <p className="text-sm text-green-600 mb-4">
               Selected: {daysOfWeek[docSlots[slotIndex][0].dateTime.getDay()]}{" "}
               {docSlots[slotIndex][0].dateTime.getDate()} at {slotTime}
@@ -277,7 +264,7 @@ const Appointment = () => {
                     slotIndex === index
                       ? "bg-primary text-white"
                       : "border border-gray-200"
-                  }`}
+                  } ${item.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
                   key={index}
                 >
                   <p>{item[0] && daysOfWeek[item[0].dateTime.getDay()]}</p>
@@ -301,6 +288,11 @@ const Appointment = () => {
                   {item.time.toLowerCase()}
                 </p>
               ))}
+            {docSlots.length > 0 && docSlots[slotIndex].length === 0 && (
+              <p className="text-sm text-red-600">
+                No time slots available for this date.
+              </p>
+            )}
           </div>
           <button type="button"
             onClick={bookAppointment}

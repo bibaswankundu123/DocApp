@@ -433,6 +433,39 @@ const getAllContactMessages = async (req, res) => {
   }
 };
 
+// API to add/update doctor schedule
+const addDoctorSchedule = async (req, res) => {
+  try {
+    const { docId, date, timeSlots } = req.body;
+
+    if (!docId || !date || !timeSlots || !Array.isArray(timeSlots)) {
+      return res.json({ success: false, message: "Missing or invalid details" });
+    }
+
+    const [year, month, day] = date.split('-');
+    if (!year || !month || !day) {
+      return res.json({ success: false, message: "Invalid date format" });
+    }
+
+    const slotDate = `${parseInt(day)}_${parseInt(month)}_${year}`;
+
+    const doctor = await doctorModel.findById(docId);
+    if (!doctor) {
+      return res.json({ success: false, message: "Doctor not found" });
+    }
+
+    let availableSlots = doctor.availableSlots || {};
+    availableSlots[slotDate] = timeSlots;
+
+    await doctorModel.findByIdAndUpdate(docId, { availableSlots });
+
+    res.json({ success: true, message: "Schedule updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export {
   getSpecialities,
   addDoctor,
@@ -445,4 +478,5 @@ export {
   markAppointmentCompleted,
   adminDashboard,
   getAllContactMessages,
+  addDoctorSchedule
 };
