@@ -26,6 +26,14 @@ const Appointment = () => {
     reason: "",
   });
 
+  const parseTime = (t) => {
+    const [time, ampm] = t.split(' ');
+    let [h, m] = time.split(':').map(Number);
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
+  };
+
   const fetchDocInfo = async () => {
     const docInfo = doctors.find((doc) => doc._id === docId);
     setDocInfo(docInfo);
@@ -34,41 +42,44 @@ const Appointment = () => {
   const getAvailableSlots = async () => {
     setDocSlots([]);
 
-    // Get dates
-    let today = new Date();
+    if (!docInfo || !docInfo.availableSlots) return;
 
-    for (let i = 0; i < 7; i++) {
-      // Get current date with index
-      let currentDate = new Date(today);
-      currentDate.setDate(today.getDate() + i);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      // Setting date month year value
-      let day = currentDate.getDate();
-      let month = currentDate.getMonth() + 1;
-      let year = currentDate.getFullYear();
+    // Get all slot dates and sort them
+    const slotDates = Object.keys(docInfo.availableSlots).sort((a, b) => {
+      const dateA = new Date(a.split("_").reverse().join("-"));
+      const dateB = new Date(b.split("_").reverse().join("-"));
+      return dateA - dateB;
+    });
 
-      const slotDate = day + "_" + month + "_" + year;
+    slotDates.forEach((slotDate) => {
+      const currentDate = new Date(slotDate.split("_").reverse().join("-"));
 
-      // Get available times for the date
+      if (currentDate < today) return;
+
       let timeSlots = [];
 
-      if (docInfo.availableSlots && docInfo.availableSlots[slotDate]) {
-        docInfo.availableSlots[slotDate].forEach((time) => {
-          const isBooked =
-            docInfo.slots_booked[slotDate] &&
-            docInfo.slots_booked[slotDate].includes(time);
+      docInfo.availableSlots[slotDate].forEach((time) => {
+        const isBooked =
+          docInfo.slots_booked[slotDate] &&
+          docInfo.slots_booked[slotDate].includes(time);
 
-          if (!isBooked) {
-            timeSlots.push({
-              dateTime: new Date(`${year}-${month}-${day}`), // For display purposes
-              time: time,
-            });
-          }
-        });
+        if (!isBooked) {
+          timeSlots.push({
+            dateTime: currentDate,
+            time: time,
+          });
+        }
+      });
+
+      timeSlots.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+      if (timeSlots.length > 0) {
+        setDocSlots((prev) => [...prev, timeSlots]);
       }
-
-      setDocSlots((prev) => [...prev, timeSlots]);
-    }
+    });
   };
 
   const bookAppointment = async () => {
@@ -246,65 +257,65 @@ const Appointment = () => {
               </li>
             </ol>
           </div>
-          {slotTime && docSlots[slotIndex] && docSlots[slotIndex][0] && (
-            <p className="text-sm text-green-600 mb-4">
-              Selected: {daysOfWeek[docSlots[slotIndex][0].dateTime.getDay()]}{" "}
-              {docSlots[slotIndex][0].dateTime.getDate()} at {slotTime}
-            </p>
-          )}
-          <div className="flex gap-3 items-center w-full overflow-x-scroll mt-4">
-            {docSlots.length &&
-              docSlots.map((item, index) => (
-                <div
-                  onClick={() => {
-                    setSlotIndex(index);
-                    setSlotTime("");
-                  }}
-                  className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${
-                    slotIndex === index
-                      ? "bg-primary text-white"
-                      : "border border-gray-200"
-                  } ${item.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                  key={index}
-                >
-                  <p>{item[0] && daysOfWeek[item[0].dateTime.getDay()]}</p>
-                  <p>{item[0] && item[0].dateTime.getDate()}</p>
-                </div>
-              ))}
-          </div>
-
-          <div className="flex items-center gap-3 overflow-x-auto max-w-full mt-4">
-            {docSlots.length > 0 &&
-              docSlots[slotIndex].map((item, index) => (
-                <p
-                  onClick={() => setSlotTime(item.time)}
-                  className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${
-                    item.time === slotTime
-                      ? "bg-primary text-white"
-                      : "text-gray-900 border border-gray-300"
-                  }`}
-                  key={index}
-                >
-                  {item.time.toLowerCase()}
+          {docSlots.length === 0 ? (
+            <p className="text-red-600 mt-4">No available slots for this doctor.</p>
+          ) : (
+            <>
+              {slotTime && docSlots[slotIndex] && docSlots[slotIndex][0] && (
+                <p className="text-sm text-green-600 mb-4">
+                  Selected: {daysOfWeek[docSlots[slotIndex][0].dateTime.getDay()]}{" "}
+                  {docSlots[slotIndex][0].dateTime.getDate()} at {slotTime}
                 </p>
-              ))}
-            {docSlots.length > 0 && docSlots[slotIndex].length === 0 && (
-              <p className="text-sm text-red-600">
-                No time slots available for this date.
-              </p>
-            )}
-          </div>
-          <button type="button"
-            onClick={bookAppointment}
-            disabled={!slotTime}
-            className={`text-sm font-light px-14 py-3 rounded-full my-6 ${
-              !slotTime
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-primary text-white"
-            }`}
-          >
-            Book an Appointment
-          </button>
+              )}
+              <div className="flex gap-3 items-center w-full overflow-x-scroll mt-4">
+                {docSlots.map((item, index) => (
+                  <div
+                    onClick={() => {
+                      setSlotIndex(index);
+                      setSlotTime("");
+                    }}
+                    className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${
+                      slotIndex === index
+                        ? "bg-primary text-white"
+                        : "border border-gray-200"
+                    }`}
+                    key={index}
+                  >
+                    <p>{item[0] && daysOfWeek[item[0].dateTime.getDay()]}</p>
+                    <p>{item[0] && item[0].dateTime.getDate()}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3 overflow-x-auto max-w-full mt-4">
+                {docSlots[slotIndex].map((item, index) => (
+                  <p
+                    onClick={() => setSlotTime(item.time)}
+                    className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${
+                      item.time === slotTime
+                        ? "bg-primary text-white"
+                        : "text-gray-900 border border-gray-300"
+                    }`}
+                    key={index}
+                  >
+                    {item.time}
+                  </p>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={bookAppointment}
+                disabled={!slotTime}
+                className={`text-sm font-light px-14 py-3 rounded-full my-6 ${
+                  !slotTime
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-primary text-white"
+                }`}
+              >
+                Book an Appointment
+              </button>
+            </>
+          )}
         </div>
 
         {/* Modal for Customer Form */}

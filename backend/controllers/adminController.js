@@ -454,12 +454,54 @@ const addDoctorSchedule = async (req, res) => {
       return res.json({ success: false, message: "Doctor not found" });
     }
 
+    const parseTime = (t) => {
+      const [time, ampm] = t.toUpperCase().split(' ');
+      let [h, m] = time.split(':').map(Number);
+      if (ampm === 'PM' && h !== 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    };
+
     let availableSlots = doctor.availableSlots || {};
-    availableSlots[slotDate] = timeSlots;
+    availableSlots[slotDate] = timeSlots.sort((a, b) => parseTime(a) - parseTime(b));
 
     await doctorModel.findByIdAndUpdate(docId, { availableSlots });
 
     res.json({ success: true, message: "Schedule updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+const deleteDoctorSchedule = async (req, res) => {
+  try {
+    const { docId, date } = req.body;
+
+    if (!docId || !date) {
+      return res.json({ success: false, message: "Missing details" });
+    }
+
+    const [year, month, day] = date.split('-');
+    if (!year || !month || !day) {
+      return res.json({ success: false, message: "Invalid date format" });
+    }
+
+    const slotDate = `${parseInt(day)}_${parseInt(month)}_${year}`;
+
+    const doctor = await doctorModel.findById(docId);
+    if (!doctor) {
+      return res.json({ success: false, message: "Doctor not found" });
+    }
+
+    let availableSlots = doctor.availableSlots || {};
+    if (availableSlots[slotDate]) {
+      delete availableSlots[slotDate];
+    }
+
+    await doctorModel.findByIdAndUpdate(docId, { availableSlots });
+
+    res.json({ success: true, message: "Schedule deleted successfully" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -478,5 +520,6 @@ export {
   markAppointmentCompleted,
   adminDashboard,
   getAllContactMessages,
-  addDoctorSchedule
+  addDoctorSchedule,
+  deleteDoctorSchedule
 };

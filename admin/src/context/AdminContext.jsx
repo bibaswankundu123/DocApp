@@ -221,6 +221,25 @@ const AdminContextProvider = (props) => {
     }
   };
 
+  const removeDoctorSchedule = async (docId, date) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/delete-schedule",
+        { docId, date },
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getAllDoctors(); // Refresh doctors
+      } else {
+        toast.error(data.message);
+      }
+      return data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const value = {
     aToken,
     setAToken,
@@ -241,7 +260,8 @@ const AdminContextProvider = (props) => {
     addSpecialty,
     getSpecialties,
     deleteSpecialty,
-    addDoctorSchedule
+    addDoctorSchedule,
+    removeDoctorSchedule
   };
 
   return (
