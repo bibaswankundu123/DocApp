@@ -44,6 +44,24 @@ const AdminContextProvider = (props) => {
     }
   };
 
+  const updateSpecialty = async (id, formData) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/update-specialty",
+        formData,
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        return data;
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const deleteSpecialty = async (id) => {
     try {
       const { data } = await axios.delete(
@@ -102,7 +120,7 @@ const AdminContextProvider = (props) => {
     try {
       const { data } = await axios.post(
         backendUrl + "/api/admin/update-doctor",
-        { docId, ...Object.fromEntries(formData) },
+        formData,
         { headers: { aToken } }
       );
       if (data.success) {
@@ -211,7 +229,7 @@ const AdminContextProvider = (props) => {
       );
       if (data.success) {
         toast.success(data.message);
-        getAllDoctors(); // Refresh doctors to get updated schedules
+        getAllDoctors();
       } else {
         toast.error(data.message);
       }
@@ -230,7 +248,7 @@ const AdminContextProvider = (props) => {
       );
       if (data.success) {
         toast.success(data.message);
-        getAllDoctors(); // Refresh doctors
+        getAllDoctors();
       } else {
         toast.error(data.message);
       }
@@ -259,6 +277,7 @@ const AdminContextProvider = (props) => {
     specialties,
     addSpecialty,
     getSpecialties,
+    updateSpecialty,
     deleteSpecialty,
     addDoctorSchedule,
     removeDoctorSchedule

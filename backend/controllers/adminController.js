@@ -6,12 +6,11 @@ import jwt from "jsonwebtoken";
 import appointmentModel from "./../models/appointmentModel.js";
 import userModel from "./../models/userModel.js";
 import contactModel from "../models/contactModel.js";
-
+import specialtyModel from "../models/specialtyModel.js";
 
 const getSpecialities = async (req, res) => {
   try {
     const specialities = await doctorModel.distinct("speciality");
-
     res.json({
       success: true,
       specialities,
@@ -24,7 +23,7 @@ const getSpecialities = async (req, res) => {
     });
   }
 };
-// API FOR ADDING DOCTOR
+
 const addDoctor = async (req, res) => {
   try {
     const {
@@ -39,7 +38,6 @@ const addDoctor = async (req, res) => {
       address,
     } = req.body;
     const imageFile = req.file;
-    // checking for all data to add doctor
     if (
       !name ||
       !email ||
@@ -59,16 +57,13 @@ const addDoctor = async (req, res) => {
       return res.json({ success: false, message: "Invalid email" });
     }
 
-    // validating strong password
     if (password.length < 8) {
       return res.json({ success: false, message: "Give a strong password" });
     }
 
-    // hashing doctor password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // upload image to cloudinary
     const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
       resource_type: "image",
     });
@@ -103,7 +98,6 @@ const addDoctor = async (req, res) => {
   }
 };
 
-// API for admin login
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -132,7 +126,6 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-// API to get all doctors list for admin panel
 const allDoctors = async (req, res) => {
   try {
     const doctors = await doctorModel.find({}).select("-password");
@@ -149,7 +142,6 @@ const allDoctors = async (req, res) => {
   }
 };
 
-// API to update doctor details
 const updateDoctor = async (req, res) => {
   try {
     const {
@@ -166,7 +158,6 @@ const updateDoctor = async (req, res) => {
     } = req.body;
     const imageFile = req.file;
 
-    // Validate required fields
     if (!docId || !name || !email || !speciality || !degree || !experience || !about || !fees || !address) {
       return res.json({ success: false, message: "Missing details" });
     }
@@ -191,13 +182,11 @@ const updateDoctor = async (req, res) => {
       address: JSON.parse(address),
     };
 
-    // Update password if provided
     if (password && password.length >= 8) {
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(password, salt);
     }
 
-    // Update image if provided
     if (imageFile) {
       const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
         resource_type: "image",
@@ -219,7 +208,6 @@ const updateDoctor = async (req, res) => {
   }
 };
 
-// API to delete a doctor
 const deleteDoctor = async (req, res) => {
   try {
     const { docId } = req.body;
@@ -228,7 +216,6 @@ const deleteDoctor = async (req, res) => {
       return res.json({ success: false, message: "Doctor not found" });
     }
 
-    // Check if doctor has active appointments
     const appointments = await appointmentModel.find({ docId, status: { $in: ["Unpaid", "Paid"] } });
     if (appointments.length > 0) {
       return res.json({
@@ -251,7 +238,6 @@ const deleteDoctor = async (req, res) => {
   }
 };
 
-// API to get all appointment list
 const appointmentsAdmin = async (req, res) => {
   try {
     const appointments = await appointmentModel.find({});
@@ -265,7 +251,6 @@ const appointmentsAdmin = async (req, res) => {
   }
 };
 
-// API for appointment cancellation
 const appointmentCancel = async (req, res) => {
   try {
     const { appointmentId, refund } = req.body;
@@ -282,7 +267,6 @@ const appointmentCancel = async (req, res) => {
 
     await appointmentModel.findByIdAndUpdate(appointmentId, updateData);
 
-    // Releasing doctor slot
     const { docId, slotDate, slotTime } = appointmentData;
     const doctorData = await doctorModel.findById(docId);
     let slots_booked = doctorData.slots_booked;
@@ -305,7 +289,6 @@ const appointmentCancel = async (req, res) => {
   }
 };
 
-// API to mark appointment as completed
 const markAppointmentCompleted = async (req, res) => {
   try {
     const { appointmentId } = req.body;
@@ -329,14 +312,12 @@ const markAppointmentCompleted = async (req, res) => {
   }
 };
 
-// API to get dashboard data for admin panel
 const adminDashboard = async (req, res) => {
   try {
     const doctors = await doctorModel.find({});
     const users = await userModel.find({});
     const appointments = await appointmentModel.find({});
 
-    // Calculate total collection (Paid + Cancelled with Paid)
     const totalCollection = await appointmentModel.aggregate([
       {
         $match: {
@@ -351,7 +332,6 @@ const adminDashboard = async (req, res) => {
       },
     ]);
 
-    // Calculate month-wise report
     const monthWiseReport = await appointmentModel.aggregate([
       {
         $match: {
@@ -372,7 +352,6 @@ const adminDashboard = async (req, res) => {
       },
     ]);
 
-    // Calculate today's collection
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -419,7 +398,7 @@ const adminDashboard = async (req, res) => {
     });
   }
 };
-// API to get all contact messages
+
 const getAllContactMessages = async (req, res) => {
   try {
     const messages = await contactModel.find({}).sort({ createdAt: -1 });
@@ -433,7 +412,6 @@ const getAllContactMessages = async (req, res) => {
   }
 };
 
-// API to add/update doctor schedule
 const addDoctorSchedule = async (req, res) => {
   try {
     const { docId, date, timeSlots } = req.body;
@@ -504,7 +482,47 @@ const deleteDoctorSchedule = async (req, res) => {
     res.json({ success: true, message: "Schedule deleted successfully" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const updateSpecialty = async (req, res) => {
+  try {
+    const { id, name } = req.body;
+    const imageFile = req.file;
+
+    if (!id || !name) {
+      return res.json({ success: false, message: "Missing details" });
+    }
+
+    const specialty = await specialtyModel.findById(id);
+    if (!specialty) {
+      return res.json({ success: false, message: "Specialty not found" });
+    }
+
+    const updateData = { name };
+
+    if (imageFile) {
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      updateData.image = imageUpload.secure_url;
+    }
+
+    await specialtyModel.findByIdAndUpdate(id, updateData);
+    res.json({
+      success: true,
+      message: "Specialty updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -521,5 +539,6 @@ export {
   adminDashboard,
   getAllContactMessages,
   addDoctorSchedule,
-  deleteDoctorSchedule
+  deleteDoctorSchedule,
+  updateSpecialty
 };

@@ -4,7 +4,7 @@ import { assets } from '../../assets/assets';
 import { toast } from 'react-toastify';
 
 const DoctorsList = () => {
-  const { doctors, aToken, getAllDoctors, changeAvailability, updateDoctor, deleteDoctor } = useContext(AdminContext);
+  const { doctors, aToken, getAllDoctors, changeAvailability, updateDoctor, deleteDoctor, specialties, getSpecialties } = useContext(AdminContext);
   const [editDoctor, setEditDoctor] = useState(null);
   const [formData, setFormData] = useState({
     docImg: false,
@@ -23,6 +23,7 @@ const DoctorsList = () => {
   useEffect(() => {
     if (aToken) {
       getAllDoctors();
+      getSpecialties();
     }
   }, [aToken]);
 
@@ -55,6 +56,7 @@ const DoctorsList = () => {
     try {
       const form = new FormData();
       if (formData.docImg) form.append('image', formData.docImg);
+      form.append('docId', editDoctor._id);
       form.append('name', formData.name);
       form.append('email', formData.email);
       if (formData.password) form.append('password', formData.password);
@@ -187,7 +189,7 @@ const DoctorsList = () => {
                     name="password"
                     onChange={handleInputChange}
                     value={formData.password}
-                    className="border rounded pxlington-3 py-2"
+                    className="border rounded px-3 py-2"
                     type="password"
                     placeholder="Password"
                   />
@@ -234,12 +236,11 @@ const DoctorsList = () => {
                     value={formData.speciality}
                     className="border rounded px-3 py-2"
                   >
-                    <option value="General Physician">General Physician</option>
-                    <option value="Gynecologist">Gynecologist</option>
-                    <option value="Dermatologist">Dermatologist</option>
-                    <option value="Pediatrician">Pediatrician</option>
-                    <option value="Neurologist">Neurologist</option>
-                    <option value="Gastroenterologist">Gastroenterologist</option>
+                    {specialties.map((spec, index) => (
+                      <option key={index} value={spec.name || spec}>
+                        {spec.name || spec}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex-1 flex flex-col gap-1">

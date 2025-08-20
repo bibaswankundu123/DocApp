@@ -1,10 +1,10 @@
 import express from "express";
 import { addDoctor, loginAdmin, allDoctors, updateDoctor,
-  deleteDoctor, appointmentsAdmin, appointmentCancel, markAppointmentCompleted, adminDashboard , getAllContactMessages, getSpecialities, addDoctorSchedule, deleteDoctorSchedule } from "../controllers/adminController.js";
+  deleteDoctor, appointmentsAdmin, appointmentCancel, markAppointmentCompleted, adminDashboard, getAllContactMessages, getSpecialities, addDoctorSchedule, deleteDoctorSchedule, updateSpecialty } from "../controllers/adminController.js";
 import upload from "../middleware/multer.js";
 import authAdmin from "../middleware/authAdmin.js";
 import { changeAvailability } from "../controllers/doctorController.js";
-import { addSpecialty, getSpecialties,deleteSpecialty } from "../controllers/specialtyController.js";
+import { addSpecialty, getSpecialties, deleteSpecialty } from "../controllers/specialtyController.js";
 
 const adminRouter = express.Router();
 
@@ -25,5 +25,6 @@ adminRouter.get("/specialties", getSpecialties);
 adminRouter.delete("/specialties/:id", authAdmin, deleteSpecialty);
 adminRouter.post("/add-schedule", authAdmin, addDoctorSchedule);
 adminRouter.post("/delete-schedule", authAdmin, deleteDoctorSchedule);
+adminRouter.post("/update-specialty", authAdmin, upload.single('image'), updateSpecialty);
 
 export default adminRouter;

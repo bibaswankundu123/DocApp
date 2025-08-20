@@ -1,4 +1,3 @@
-// Admin/AddSpecialty.js
 import React, { useState, useContext, useEffect } from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
@@ -7,7 +6,8 @@ import { assets } from "../../assets/assets";
 const AddSpecialty = () => {
   const [name, setName] = useState("");
   const [specialtyImg, setSpecialtyImg] = useState(false);
-  const { addSpecialty, specialties, getSpecialties, deleteSpecialty } = useContext(AdminContext);
+  const [editSpecialty, setEditSpecialty] = useState(null);
+  const { addSpecialty, specialties, getSpecialties, deleteSpecialty, updateSpecialty } = useContext(AdminContext);
 
   useEffect(() => {
     getSpecialties();
@@ -26,6 +26,34 @@ const AddSpecialty = () => {
     await addSpecialty(formData);
     setName("");
     setSpecialtyImg(false);
+  };
+
+  const handleEdit = (specialty) => {
+    setEditSpecialty(specialty);
+    setName(specialty.name);
+    setSpecialtyImg(false);
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    if (!name) {
+      return toast.error("Specialty name is required");
+    }
+
+    const formData = new FormData();
+    formData.append("id", editSpecialty._id);
+    formData.append("name", name);
+    if (specialtyImg) formData.append("image", specialtyImg);
+
+    try {
+      await updateSpecialty(editSpecialty._id, formData);
+      setEditSpecialty(null);
+      setName("");
+      setSpecialtyImg(false);
+      getSpecialties();
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -89,7 +117,60 @@ const AddSpecialty = () => {
         </div>
       </form>
 
-      {/* Specialty List Section */}
+      {editSpecialty && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <form onSubmit={handleSubmitEdit} className="m-5 w-full max-w-4xl bg-white px-8 py-8 border rounded max-h-[80vh] overflow-y-scroll">
+            <p className="mb-3 text-lg font-medium">Edit Specialty</p>
+            <div className="flex items-center gap-4 mb-8 text-gray-500">
+              <label htmlFor="edit-specialty-img">
+                <img
+                  className="w-16 bg-gray-100 rounded-full cursor-pointer"
+                  src={specialtyImg ? URL.createObjectURL(specialtyImg) : editSpecialty.image || assets.upload_area}
+                  alt=""
+                />
+              </label>
+              <input
+                onChange={(e) => setSpecialtyImg(e.target.files[0])}
+                type="file"
+                id="edit-specialty-img"
+                hidden
+              />
+              <p>Upload specialty image (optional)</p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex-1 flex flex-col gap-1">
+                <p>Specialty Name</p>
+                <input
+                  onChange={(e) => setName(e.target.value)}
+                  value={name}
+                  className="border rounded px-3 py-2"
+                  type="text"
+                  placeholder="e.g. Cardiologist"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="submit"
+                  className="bg-primary px-10 py-3 text-white rounded-full"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditSpecialty(null)}
+                  className="bg-gray-500 px-10 py-3 text-white rounded-full"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="bg-white px-8 py-8 border rounded w-full max-w-4xl">
         <p className="mb-3 text-lg font-medium">Specialty List</p>
         {specialties.length === 0 ? (
@@ -108,12 +189,20 @@ const AddSpecialty = () => {
                   )}
                   <span>{specialty.name}</span>
                 </div>
-                <button
-                  onClick={() => handleDelete(specialty._id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(specialty)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(specialty._id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
