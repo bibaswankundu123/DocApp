@@ -11,12 +11,12 @@ const Header = () => {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-snug md:leading-tight">
             Book Appointment
             <br />
-            With Trusted Doctors
+            With Trusted Doctors.
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl">
-            <span className="text-yellow-300 font-bold text-2xl md:text-3xl">Medicaid</span> is now in your city!
+            <span className="text-yellow-300 font-bold text-2xl md:text-3xl">DocApp</span> is now just a click away!
           </p>
 
           <div className="flex flex-col md:flex-row items-center gap-3 text-sm font-light">

@@ -21,14 +21,14 @@ const WelcomeBanner = () => {
         {/* Right Side - Text Content */}
         <div className="md:w-1/2 w-full flex flex-col gap-6">
           <h2 className="text-3xl md:text-4xl font-bold text-primary">
-            Welcome to Medicaid
+            Welcome to DocApp
           </h2>
           <p className="text-gray-600 text-lg">
             Your trusted healthcare partner for quality medical services and
             compassionate care.
           </p>
           <p className="text-gray-700 bg-gray-50 p-5 rounded-lg leading-relaxed">
-            Medicaid provides comprehensive healthcare services with a network
+            DocApp provides comprehensive healthcare services with a network
             of experienced professionals dedicated to your wellbeing. Our
             patient-centered approach ensures you receive personalized care
             tailored to your specific needs. With state-of-the-art facilities

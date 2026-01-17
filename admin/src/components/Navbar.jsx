@@ -24,9 +24,9 @@ const Navbar = () => {
         <img 
           className="w-12 h-12" 
           src="/company-logo.png" 
-          alt="Medicaid Logo" 
+          alt="DocApp Logo" 
         />
-        <span className="text-2xl font-bold text-primary">Medicaid</span>
+        <span className="text-2xl font-bold text-primary">DocApp</span>
         <p className="border px-2.5 py-0.5 rounded-full border-gray-500 text-gray-600">{aToken ? "Admin" : "Doctor"}</p>
       </div>
       <button onClick={logout} className="bg-primary text-white text-sm px-10 py-2 rounded-full">Logout</button>

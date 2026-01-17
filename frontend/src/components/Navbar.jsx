@@ -53,9 +53,9 @@ const Navbar = () => {
             <img
               className="w-10 h-10"
               src="/company-logo.png"
-              alt="Medicaid Logo"
+              alt="DocApp Logo"
             />
-            <span className="text-2xl font-bold text-primary">Medicaid</span>
+            <span className="text-2xl font-bold text-primary">DocApp</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -142,7 +142,7 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className="hidden md:block bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primary-dark transition-colors shadow-sm"
+                className="hidden md:block bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-dark transition-colors shadow-sm"
               >
                 Create Account
               </button>
@@ -169,9 +169,9 @@ const Navbar = () => {
                 <img
                   className="w-10 h-10"
                   src="/company-logo.png"
-                  alt="Medicaid Logo"
+                  alt="DocApp Logo"
                 />
-                <span className="text-xl font-bold text-primary">Medicaid</span>
+                <span className="text-xl font-bold text-primary">DocApp</span>
               </div>
               <button
                 onClick={() => setShowMenu(false)}
@@ -209,7 +209,7 @@ const Navbar = () => {
                     navigate("/login");
                     setShowMenu(false);
                   }}
-                  className="w-full mt-6 bg-primary text-white py-3 rounded-md font-medium"
+                  className="w-full mt-6 bg-primary text-white py-3 rounded-full font-medium"
                 >
                   Create Account
                 </button>

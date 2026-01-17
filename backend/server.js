@@ -11,6 +11,7 @@ import userRouter from './routes/userRoute.js';
 
 const app = express()
 const port = process.env.PORT || 5000;
+console.log("Mongo URI from env:", process.env.MONGODB_URI);
 connectDB();
 connectCloudinary();
 

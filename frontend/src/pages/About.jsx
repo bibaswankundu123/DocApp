@@ -30,7 +30,7 @@ const About = () => {
         <div className="lg:w-1/2 space-y-6">
           <h3 className="text-2xl font-bold text-gray-800">Our Story</h3>
           <p className="text-lg leading-relaxed text-gray-700">
-            Founded in 2020, our platform emerged from a simple idea: healthcare should be accessible, transparent, and patient-centric. We've built a bridge between patients and top-tier medical professionals, eliminating traditional barriers to quality care.
+            Our platform emerged from a simple idea: healthcare should be accessible, transparent, and patient-centric. We've built a bridge between patients and top-tier medical professionals, eliminating traditional barriers to quality care.
           </p>
 
           <div className="space-y-6">

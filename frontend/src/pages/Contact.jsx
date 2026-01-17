@@ -165,8 +165,8 @@ const Contact = () => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Phone Support</h3>
-          <p className="text-gray-600"> <span>7585817053 / 03412301000 / 03412303612</span></p>
-          <p className="text-gray-600">Mon-Fri, 8am-6pm</p>
+          <p className="text-gray-600"> <span>7980231951</span></p>
+        
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-md text-center">
@@ -176,7 +176,7 @@ const Contact = () => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Email Us</h3>
-          <p className="text-gray-600">msmedicaid.asansol98@gmail.com</p>
+          <p className="text-gray-600">bibaswankundu4@gmail.com</p>
           <p className="text-gray-600">Response within 24 hours</p>
         </div>
 
@@ -188,8 +188,7 @@ const Contact = () => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Visit Us</h3>
-          <p className="text-gray-600">132/60(88/1) Room No-1, Ward No-46, SB Gorai Road Asansol-, ,</p>
-          <p className="text-gray-600">Paschim Burdwan, West Bengal 713101</p>
+          <p className="text-gray-600">Kolkata, West Bengal</p>
         </div>
       </div>
     </div>
