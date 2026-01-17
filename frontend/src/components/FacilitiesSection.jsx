@@ -107,11 +107,11 @@ const FacilitiesSection = () => {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3 text-gray-600">
                   <FaPhone className="text-primary" />
-                  <span>7585817053 / 03412301000 / 03412303612</span>
+                  <span>7980231951</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <FaEnvelope className="text-primary" />
-                  <span>msmedicaid.asansol98@gmail.com</span>
+                  <span>bibaswankundu4@gmail.com</span>
                 </div>
               </div>
             </div>

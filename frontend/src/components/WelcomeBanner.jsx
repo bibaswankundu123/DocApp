@@ -13,7 +13,7 @@ const WelcomeBanner = () => {
         <div className="md:w-1/2 w-full rounded-xl overflow-hidden h-[28rem] shadow-md">
           <img
             src="/about.jpg"
-            alt="Welcome to Medicaid"
+            alt="Welcome to Docapp"
             className="w-full h-full object-cover"
           />
         </div>
