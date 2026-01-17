@@ -16,6 +16,7 @@ build/ # React build
 coverage/ # Test coverage reports
 
 # Local environment files
+.env
 *.local
 
 # Editor directories and files
