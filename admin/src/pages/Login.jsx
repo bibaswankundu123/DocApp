@@ -79,6 +79,32 @@ const Login = () => {
         >
           Login
         </button>
+         {state === "Admin" && (
+          <div className="w-full mt-2 p-3 bg-gray-50 border rounded text-xs">
+            <p className="font-semibold text-gray-700">
+              Demo Admin Credentials
+            </p>
+            <p>
+              Email:{" "}
+              <span className="font-mono">admin@doctorapp.com</span>
+            </p>
+            <p>
+              Password:{" "}
+              <span className="font-mono">qwerty1234</span>
+            </p>
+
+            <p
+              className="text-primary cursor-pointer mt-2 underline"
+              onClick={() => {
+                setEmail("admin@doctorapp.com");
+                setPassword("qwerty1234");
+              }}
+            >
+              Autofill demo credentials
+            </p>
+          </div>
+        )}
+
         {state === "Admin" ? (
           <p>
             Doctor Login ?
